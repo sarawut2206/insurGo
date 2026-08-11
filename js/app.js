@@ -11,10 +11,65 @@
   const $  = s => document.querySelector(s);
   const $$ = s => Array.prototype.slice.call(document.querySelectorAll(s));
 
-  function go(name) {
-    $$('.screen').forEach(s => s.classList.remove('active'));
-    $('#screen-' + name).classList.add('active');
+  /* ───────── การสั่นตอบสนอง ─────────
+     แอปที่ดีต้องให้ feedback ทันทีที่นิ้วแตะ ไม่ใช่รอผลลัพธ์ */
+  function haptic(ms) {
+    try { if (navigator.vibrate) navigator.vibrate(ms || 8); } catch (e) {}
+  }
+
+  /* ───────── ชื่อหน้าจอ สำหรับประกาศให้โปรแกรมอ่านหน้าจอ ───────── */
+  const SCREEN_TITLE = {
+    home: 'หน้าแรก เล่าทริปของคุณ',
+    analyzing: 'กำลังวิเคราะห์ทริป',
+    analysis: 'ผลการวิเคราะห์ทริป',
+    plans: 'แผนความคุ้มครองที่เหมาะกับทริป',
+    insurers: 'บริษัทประกันภัยในไทย',
+    checkout: 'ยืนยันความคุ้มครอง',
+    policy: 'ความคุ้มครองของคุณ',
+    b2b: 'สำหรับบริษัทประกันภัย'
+  };
+
+  let current = 'home';
+
+  /* ───────── เปลี่ยนหน้า ─────────
+     ผูกกับ history จริง เพื่อให้ปุ่มย้อนกลับของ Android และท่าปัดกลับของ iOS ทำงานได้
+     ซึ่งเป็นสิ่งที่แยกแอปที่ทำมาดี ออกจากเว็บที่ใส่กรอบมือถือ */
+  function go(name, opts) {
+    opts = opts || {};
+    if (!$('#screen-' + name)) return;
+
+    const el = $('#screen-' + name);
+    $$('.screen').forEach(s => s.classList.remove('active', 'back'));
+    if (opts.back) el.classList.add('back');
+    el.classList.add('active');
+    current = name;
+
     window.scrollTo(0, 0);
+
+    if (!opts.fromPop) {
+      const state = { screen: name };
+      if (opts.replace) history.replaceState(state, '', '#' + name);
+      else history.pushState(state, '', '#' + name);
+    }
+
+    // ย้ายโฟกัสไปหัวข้อของหน้าใหม่ ไม่งั้นผู้ใช้คีย์บอร์ดและ screen reader จะหลงอยู่หน้าเดิม
+    const h = el.querySelector('[tabindex="-1"]');
+    if (h) { try { h.focus({ preventScroll: true }); } catch (e) { h.focus(); } }
+
+    $('#live').textContent = SCREEN_TITLE[name] || '';
+  }
+
+  function initRouter() {
+    history.replaceState({ screen: 'home' }, '', location.hash || '#home');
+
+    window.addEventListener('popstate', e => {
+      const name = (e.state && e.state.screen) || 'home';
+      go(name, { fromPop: true, back: true });
+    });
+
+    // เปิดจาก shortcut ของแอป เช่น #b2b
+    const start = (location.hash || '').replace('#', '');
+    if (start && start !== 'home' && $('#screen-' + start)) go(start, { replace: true });
   }
 
   function toast(msg) {
@@ -22,7 +77,7 @@
     t.textContent = msg;
     t.classList.add('show');
     clearTimeout(t._timer);
-    t._timer = setTimeout(() => t.classList.remove('show'), 2600);
+    t._timer = setTimeout(() => t.classList.remove('show'), 2800);
   }
 
   function esc(s) {
@@ -55,12 +110,33 @@
   /* ───────── 2. วิเคราะห์ ───────── */
   function analyze() {
     const text = $('#trip-input').value.trim();
-    if (!text) { toast('พิมพ์เล่าทริปของคุณก่อนครับ'); return; }
+    if (!text) {
+      toast('พิมพ์เล่าทริปของคุณก่อนครับ');
+      $('#trip-input').focus();
+      haptic([20, 60, 20]);
+      return;
+    }
+
+    haptic(12);
+    document.activeElement && document.activeElement.blur();   // ปิดคีย์บอร์ดบนมือถือ
 
     trip = Trip.understand(text);
     Store.log('วิเคราะห์ทริป: "' + text.slice(0, 60) + '"');
     renderAnalysis();
-    go('analysis');
+
+    // ผู้ที่ตั้งค่าลดการเคลื่อนไหวไว้ ไม่ควรถูกบังคับให้รอแอนิเมชัน
+    const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduced) { go('analysis'); return; }
+
+    go('analyzing');
+    const steps = $$('#analyze-steps li');
+    steps.forEach(li => li.classList.remove('done'));
+    steps.forEach((li, i) => setTimeout(() => li.classList.add('done'), 160 + i * 190));
+    setTimeout(() => {
+      if (current !== 'analyzing') return;   // ผู้ใช้กดย้อนกลับระหว่างรอ — อย่าดึงกลับมา
+      haptic(10);
+      go('analysis', { replace: true });
+    }, 160 + steps.length * 190 + 200);
   }
 
   function opt(v, label, selected) {
@@ -419,15 +495,112 @@
       '<div class="notice"><b>นี่คือเอกสารตัวอย่างจากการสาธิต</b> — ไม่มีผลคุ้มครองจริง ไม่มีการชำระเงิน และไม่มีบริษัทใดออกกรมธรรม์นี้ ในระบบจริงกรมธรรม์ออกโดยบริษัทประกันภัยที่ได้รับใบอนุญาตเท่านั้น</div>';
   }
 
+  /* ───────── ติดตั้งเป็นแอป ─────────
+     Android/Chrome ให้ปุ่มติดตั้งได้จริง ส่วน iOS Safari ต้องบอกวิธีทำเอง */
+  let deferredPrompt = null;
+
+  function isStandalone() {
+    return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+           window.navigator.standalone === true;
+  }
+  function isIOS() {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  }
+
+  function initInstall() {
+    if (isStandalone() || Store.state.installDismissed) return;
+
+    const card = $('#install-card');
+    const btn  = $('#btn-install');
+
+    const reveal = () => { card.hidden = false; btn.hidden = false; };
+
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      deferredPrompt = e;
+      reveal();
+    });
+
+    // iOS ไม่ยิง beforeinstallprompt เลย จึงต้องเสนอวิธีติดตั้งด้วยตัวเอง
+    if (isIOS()) reveal();
+
+    const doInstall = async () => {
+      haptic(12);
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const res = await deferredPrompt.userChoice;
+        Store.log('ผลการติดตั้งแอป: ' + res.outcome);
+        deferredPrompt = null;
+        if (res.outcome === 'accepted') { card.hidden = true; btn.hidden = true; }
+        return;
+      }
+      $('#ios-sheet').hidden = false;
+    };
+
+    $('#install-go').addEventListener('click', doInstall);
+    btn.addEventListener('click', doInstall);
+
+    $('#install-close').addEventListener('click', () => {
+      card.hidden = true;
+      Store.setInstallDismissed();
+    });
+
+    $('#ios-close').addEventListener('click', () => { $('#ios-sheet').hidden = true; });
+    $('#ios-sheet').addEventListener('click', e => {
+      if (e.target === $('#ios-sheet')) $('#ios-sheet').hidden = true;   // แตะนอกแผ่นเพื่อปิด
+    });
+
+    window.addEventListener('appinstalled', () => {
+      card.hidden = true; btn.hidden = true;
+      Store.log('ติดตั้งแอปลงเครื่องแล้ว');
+      toast('ติดตั้งแล้ว เปิดจากหน้าจอโฮมได้เลย');
+    });
+  }
+
+  /* ───────── สถานะออฟไลน์ ───────── */
+  function initNetwork() {
+    const bar = $('#offline-bar');
+    const sync = () => {
+      const off = !navigator.onLine;
+      bar.hidden = !off;
+      document.body.style.paddingTop = off ? '38px' : '';
+    };
+    window.addEventListener('online', () => { sync(); toast('กลับมาออนไลน์แล้ว'); });
+    window.addEventListener('offline', sync);
+    sync();
+  }
+
+  /* ───────── ปิด sheet ด้วยปุ่ม Escape ───────── */
+  function initKeys() {
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && !$('#ios-sheet').hidden) $('#ios-sheet').hidden = true;
+    });
+  }
+
   /* ───────── boot ───────── */
   function boot() {
+    initRouter();
+    initInstall();
+    initNetwork();
+    initKeys();
     initHome();
     initAnalysis();
     initActivities();
     initCheckout();
     renderInsurers();
 
-    $$('[data-go]').forEach(b => b.addEventListener('click', () => go(b.dataset.go)));
+    // ปุ่มย้อนกลับใช้ history จริง เพื่อให้พฤติกรรมตรงกับปุ่มย้อนกลับของเครื่อง
+    $$('[data-go]').forEach(b => b.addEventListener('click', () => {
+      haptic(6);
+      if (b.classList.contains('back')) { history.back(); return; }
+      go(b.dataset.go);
+    }));
+
+    // ให้ทุกปุ่มสั่นตอบสนองเบา ๆ เหมือนแอป native
+    document.addEventListener('click', e => {
+      const el = e.target.closest('button, .act-chip, .example-chip, .ins-row');
+      if (el && !el.disabled) haptic(6);
+    }, { passive: true });
 
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').catch(() => {});

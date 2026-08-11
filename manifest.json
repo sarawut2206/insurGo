@@ -1,19 +1,38 @@
 {
-  "name": "ประกันไปกับคุณ",
+  "name": "ประกันไปกับคุณ — AI Insurance Companion",
   "short_name": "ประกันไปกับคุณ",
-  "description": "เข้าใจความเสี่ยงของคุณ ก่อนตัดสินใจเรื่องประกัน",
+  "description": "บอกเราว่าคุณกำลังจะไปไหน เราจะช่วยดูว่าคุณกำลังเสี่ยงอะไร และค้นหาความคุ้มครองที่เหมาะกับทริปของคุณ",
   "lang": "th",
   "dir": "ltr",
+  "id": "/insurGo/",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "orientation": "portrait",
   "background_color": "#F4F7FC",
   "theme_color": "#0B3D91",
-  "categories": ["finance", "utilities"],
+  "categories": ["finance", "travel", "utilities"],
+  "prefer_related_applications": false,
   "icons": [
-    { "src": "icons/logo.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "icons/logo.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icons/logo.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" },
+    { "src": "icons/logo.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ],
+  "shortcuts": [
+    {
+      "name": "เริ่มทริปใหม่",
+      "short_name": "ทริปใหม่",
+      "description": "เล่าทริปแล้วให้ระบบวิเคราะห์ความเสี่ยง",
+      "url": "./index.html#home",
+      "icons": [{ "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "สำหรับบริษัทประกันภัย",
+      "short_name": "B2B",
+      "description": "โมเดลธุรกิจสำหรับพันธมิตร",
+      "url": "./index.html#b2b",
+      "icons": [{ "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    }
   ]
 }

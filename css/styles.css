@@ -47,6 +47,59 @@ html, body {
   font-size: 16px;
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
+  text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+html {
+  /* กันการลากหน้าจอเด้งแบบเว็บ ให้รู้สึกเป็นแอปจริง */
+  overscroll-behavior-y: none;
+  scroll-behavior: smooth;
+}
+
+body { overscroll-behavior-y: none; }
+
+/* ปุ่มและลิงก์ทุกตัวต้องตอบสนองการแตะทันที ไม่มีดีเลย์ 300ms */
+button, a, input, select, textarea, label, summary { touch-action: manipulation; }
+
+/* ─── การเข้าถึง ─── */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+.skip-link {
+  position: fixed; top: -60px; left: 12px; z-index: 200;
+  background: var(--navy); color: #fff; padding: 11px 18px; border-radius: 0 0 12px 12px;
+  text-decoration: none; font-size: 14px; font-weight: 700; transition: top .18s;
+}
+.skip-link:focus { top: 0; }
+
+/* วงแหวนโฟกัสที่มองเห็นชัดสำหรับผู้ใช้คีย์บอร์ด แต่ไม่รบกวนผู้ใช้ที่แตะจอ */
+:focus { outline: none; }
+:focus-visible {
+  outline: 3px solid var(--teal);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+h1[tabindex="-1"]:focus-visible, h2[tabindex="-1"]:focus-visible { outline-offset: 6px; }
+
+/* ─── แถบออฟไลน์ ─── */
+.offline-bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 150;
+  background: var(--risk-mid); color: #241a00; text-align: center;
+  font-size: 13px; font-weight: 700; padding: calc(8px + env(safe-area-inset-top)) 12px 8px;
+  animation: dropIn .3s ease;
+}
+@keyframes dropIn { from { transform: translateY(-100%); } to { transform: none; } }
+
+/* ─── เคารพการตั้งค่าลดการเคลื่อนไหวของระบบ ─── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 #app {
@@ -56,10 +109,13 @@ html, body {
   padding: env(safe-area-inset-top) 0 calc(96px + env(safe-area-inset-bottom));
 }
 
-/* ───────── screens ───────── */
-.screen { display: none; padding: 0 16px 8px; animation: fade .28s ease; }
-.screen.active { display: block; }
-@keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+/* ───────── screens ─────────
+   ใช้ transform/opacity เท่านั้น เพื่อให้ทรานซิชันวิ่งบน GPU ได้ 60fps */
+.screen { display: none; padding: 0 16px 8px; }
+.screen.active { display: block; animation: pushIn .3s cubic-bezier(.32,.72,0,1); }
+.screen.active.back { animation: popIn .3s cubic-bezier(.32,.72,0,1); }
+@keyframes pushIn { from { opacity: 0; transform: translate3d(24px,0,0); } to { opacity: 1; transform: none; } }
+@keyframes popIn  { from { opacity: 0; transform: translate3d(-24px,0,0); } to { opacity: 1; transform: none; } }
 
 /* ───────── app bar ───────── */
 .appbar {
@@ -69,9 +125,12 @@ html, body {
 .appbar-logo { width: 34px; height: 34px; object-fit: contain; }
 .appbar-name { font-weight: 800; font-size: 17px; flex: 1; letter-spacing: -.2px; }
 .appbar-btn {
-  border: 0; background: var(--surface); color: var(--text); width: 36px; height: 36px;
-  border-radius: 11px; font-size: 16px; cursor: pointer; box-shadow: var(--shadow);
+  border: 0; background: linear-gradient(100deg, var(--navy), var(--teal)); color: #fff;
+  min-width: 44px; height: 44px; padding: 0 14px;
+  border-radius: 13px; font-size: 15px; font-weight: 700; font-family: inherit;
+  cursor: pointer; box-shadow: var(--shadow); transition: transform .12s;
 }
+.appbar-btn:active { transform: scale(.94); }
 
 /* ───────── hero ───────── */
 .hero {
@@ -181,10 +240,13 @@ html, body {
 /* ───────── topbar ───────── */
 .topbar { display: flex; align-items: center; gap: 10px; padding: 14px 0 10px; position: sticky; top: 0; background: var(--bg); z-index: 20; }
 .topbar h1 { font-size: 19px; margin: 0; font-weight: 700; }
+/* พื้นที่แตะขั้นต่ำ 44px ตามแนวทาง Apple HIG และ WCAG 2.5.5 */
 .back {
-  border: 0; background: var(--surface); color: var(--text); width: 38px; height: 38px;
+  border: 0; background: var(--surface); color: var(--text); width: 44px; height: 44px;
   border-radius: 50%; font-size: 19px; cursor: pointer; flex-shrink: 0; box-shadow: var(--shadow);
+  display: grid; place-items: center; transition: transform .12s, background .15s;
 }
+.back:active { transform: scale(.9); background: var(--surface-2); }
 
 /* ───────── cards ───────── */
 .card {
@@ -236,12 +298,14 @@ html, body {
 
 /* ───────── buttons ───────── */
 .btn {
-  display: block; width: 100%; padding: 15px; border-radius: 13px; border: 0;
+  display: block; width: 100%; min-height: 52px; padding: 15px; border-radius: 14px; border: 0;
   font-size: 16px; font-weight: 700; cursor: pointer; margin-bottom: 10px;
-  font-family: inherit; transition: transform .12s, opacity .18s;
+  font-family: inherit; transition: transform .12s, opacity .18s, box-shadow .18s;
 }
-.btn:active { transform: scale(.985); }
-.btn:disabled { opacity: .42; cursor: not-allowed; }
+.btn:active:not(:disabled) { transform: scale(.97); }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.btn-primary { box-shadow: 0 6px 18px -6px rgba(11,61,145,.55); }
+.btn-primary:active:not(:disabled) { box-shadow: 0 2px 8px -4px rgba(11,61,145,.5); }
 .btn-primary { background: linear-gradient(100deg, var(--navy), var(--teal)); color: #fff; }
 .btn-ghost { background: var(--surface); color: var(--text); border: 1px solid var(--line); }
 .btn-danger { background: transparent; color: var(--risk-high); border: 1px solid var(--risk-high); }
@@ -276,15 +340,28 @@ html, body {
 }
 
 /* ───────── analyzing ───────── */
-.analyzing { text-align: center; padding: 90px 20px; }
-.analyzing h2 { font-size: 19px; margin: 18px 0 22px; }
-.pulse img { width: 92px; height: 92px; object-fit: contain; animation: breathe 1.5s ease-in-out infinite; }
-@keyframes breathe { 0%,100% { transform: scale(1); opacity: .85; } 50% { transform: scale(1.09); opacity: 1; } }
-.steps { list-style: none; padding: 0; margin: 0; text-align: left; max-width: 290px; margin: 0 auto; }
-.steps li { padding: 9px 0 9px 30px; position: relative; font-size: 14px; color: var(--text-dim); opacity: .35; transition: opacity .3s; }
-.steps li::before { content: "○"; position: absolute; left: 6px; }
+.analyzing { text-align: center; padding: 88px 20px; }
+.analyzing h2 { font-size: 20px; margin: 20px 0 24px; }
+.pulse img {
+  width: 96px; height: 96px; object-fit: contain; border-radius: 24px;
+  animation: breathe 1.6s ease-in-out infinite;
+  box-shadow: 0 12px 34px -12px rgba(11,61,145,.7);
+}
+@keyframes breathe { 0%,100% { transform: scale(1); } 50% { transform: scale(1.07); } }
+.steps { list-style: none; padding: 0; text-align: left; max-width: 300px; margin: 0 auto; }
+.steps li {
+  padding: 10px 0 10px 32px; position: relative; font-size: 14.5px;
+  color: var(--text-dim); opacity: .3; transition: opacity .35s, color .35s;
+}
+.steps li::before {
+  content: ""; position: absolute; left: 6px; top: 17px;
+  width: 9px; height: 9px; border-radius: 50%; border: 2px solid currentColor;
+}
 .steps li.done { opacity: 1; color: var(--text); }
-.steps li.done::before { content: "✓"; color: var(--teal); font-weight: 700; }
+.steps li.done::before {
+  content: "✓"; border: 0; top: 10px; left: 4px; width: auto; height: auto;
+  color: var(--teal); font-weight: 800; font-size: 15px;
+}
 
 /* ───────── domain rows ───────── */
 .domain {
@@ -403,10 +480,10 @@ html, body {
 .example-list { display: flex; flex-direction: column; gap: 8px; }
 .example-chip {
   text-align: left; background: var(--surface); border: 1px solid var(--line);
-  border-radius: 30px; padding: 11px 17px; font-family: inherit; font-size: 13.5px;
-  color: var(--text-dim); cursor: pointer; transition: border-color .15s, color .15s;
+  border-radius: 30px; padding: 12px 17px; min-height: 44px; font-family: inherit; font-size: 13.5px;
+  color: var(--text-dim); cursor: pointer; transition: border-color .15s, color .15s, transform .12s;
 }
-.example-chip:active { border-color: var(--teal); color: var(--text); }
+.example-chip:active { border-color: var(--teal); color: var(--text); transform: scale(.98); }
 .example-chip::before { content: "💬 "; }
 
 .mini-journey {
@@ -524,6 +601,56 @@ html, body {
 .ins-row b { display: block; font-size: 14.5px; }
 .ins-row small { display: block; font-size: 12px; color: var(--text-dim); margin-top: 2px; }
 .ins-go { font-size: 11.5px; color: var(--teal); font-weight: 700; white-space: nowrap; flex-shrink: 0; }
+.ins-row:active { border-color: var(--teal); transform: scale(.99); }
+
+/* ═══════════ ติดตั้งเป็นแอป ═══════════ */
+.install-card {
+  display: flex; gap: 13px; align-items: center;
+  background: linear-gradient(135deg, var(--navy), var(--navy-2) 70%, #0E8FB8);
+  color: #fff; border-radius: 17px; padding: 15px; margin: 14px 0 0;
+}
+.install-card img { width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0; }
+.install-card div { flex: 1; min-width: 0; }
+.install-card b { display: block; font-size: 14.5px; }
+.install-card span { font-size: 12px; opacity: .85; }
+.install-card button {
+  border: 0; background: #fff; color: var(--navy); font-family: inherit; font-weight: 700;
+  font-size: 13.5px; padding: 11px 16px; border-radius: 11px; cursor: pointer;
+  flex-shrink: 0; min-height: 44px;
+}
+.install-card .close-x {
+  background: rgba(255,255,255,.15); color: #fff; padding: 0; width: 44px; min-height: 44px;
+  border-radius: 50%; font-size: 15px;
+}
+
+/* ─── bottom sheet (วิธีติดตั้งบน iPhone) ─── */
+.sheet-back {
+  position: fixed; inset: 0; z-index: 160; background: rgba(8,19,39,.55);
+  display: flex; align-items: flex-end; animation: fadeIn .2s ease;
+  backdrop-filter: blur(2px);
+}
+.sheet-back[hidden] { display: none; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.sheet {
+  background: var(--surface); width: 100%; max-width: 480px; margin: 0 auto;
+  border-radius: 22px 22px 0 0; padding: 10px 20px calc(24px + env(safe-area-inset-bottom));
+  animation: sheetUp .32s cubic-bezier(.32,.72,0,1); max-height: 86vh; overflow-y: auto;
+}
+@keyframes sheetUp { from { transform: translate3d(0,100%,0); } to { transform: none; } }
+.sheet-grip { width: 40px; height: 4px; border-radius: 20px; background: var(--line); margin: 0 auto 16px; }
+.sheet h2 { font-size: 18px; margin: 0 0 4px; }
+.sheet p { font-size: 13.5px; color: var(--text-dim); margin: 0 0 14px; }
+.sheet ol { margin: 0 0 18px; padding-left: 22px; font-size: 14px; line-height: 2; }
+.sheet ol li::marker { color: var(--teal); font-weight: 700; }
+
+/* ─── ปุ่มหลักที่ลอยอยู่ล่างจอ สำหรับหน้าที่เนื้อหายาว ─── */
+.sticky-cta {
+  position: sticky; bottom: 0; z-index: 40;
+  padding: 12px 0 calc(10px + env(safe-area-inset-bottom));
+  margin: 6px -16px -8px; padding-left: 16px; padding-right: 16px;
+  background: linear-gradient(to top, var(--bg) 68%, transparent);
+}
+.sticky-cta .btn { margin-bottom: 0; }
 
 /* ─── สรุปทริปแบบชิป ─── */
 .trip-chip {

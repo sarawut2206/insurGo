@@ -17,6 +17,7 @@ const Store = (function () {
     answers: {},
     result: null,
     reviewSent: null,
+    installDismissed: false,
     audit: []
   });
 
@@ -74,6 +75,12 @@ const Store = (function () {
 
     markReviewSent(ref) {
       state.reviewSent = { ref: ref, at: stamp() };
+      save();
+    },
+
+    // ผู้ใช้ปิดคำชวนติดตั้งแล้ว อย่ารบกวนซ้ำ
+    setInstallDismissed() {
+      state.installDismissed = true;
       save();
     },
 
