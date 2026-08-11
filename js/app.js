@@ -11,6 +11,15 @@
   const $$ = s => Array.prototype.slice.call(document.querySelectorAll(s));
 
   /* ───────── navigation ───────── */
+
+  // หน้าจอไหนทำให้แท็บล่างข้างล่างสว่างขึ้น
+  const TAB_OF = {
+    welcome: 'welcome', category: 'welcome',
+    consent: 'consent', quiz: 'consent', analyzing: 'consent',
+    profile: 'profile', review: 'profile',
+    mydata: 'mydata'
+  };
+
   function go(name) {
     $$('.screen').forEach(s => s.classList.remove('active'));
     const el = $('#screen-' + name);
@@ -18,6 +27,13 @@
     window.scrollTo(0, 0);
     if (name === 'mydata') renderMyData();
     if (name === 'review') renderReview();
+
+    // ซ่อนแท็บระหว่างทำแบบสอบถาม เพื่อไม่ให้กดออกกลางคันโดยไม่ตั้งใจ
+    const hide = (name === 'quiz' || name === 'analyzing');
+    $('#tabbar').style.display = hide ? 'none' : '';
+
+    const tab = TAB_OF[name];
+    $$('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
   }
 
   function toast(msg) {
@@ -30,6 +46,73 @@
 
   function esc(s) {
     return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  }
+
+  /* ───────── home: การ์ดหมวด + จุดเด่น ───────── */
+  function renderHome() {
+    $('#cat-grid').innerHTML = Object.keys(DOMAINS).map(k =>
+      '<button class="cat-card" data-cat="' + k + '">' +
+        '<span class="cat-ico">' + DOMAINS[k].icon + '</span>' +
+        '<b>' + esc(DOMAINS[k].name.replace('ความเสี่ยงด้าน', '')) + '</b>' +
+        '<small>' + esc(DOMAINS[k].short) + '</small>' +
+        '<span class="cat-more">ดูรายละเอียด ❯</span>' +
+      '</button>'
+    ).join('');
+
+    $$('#cat-grid .cat-card').forEach(c =>
+      c.addEventListener('click', () => openCategory(c.dataset.cat)));
+
+    $('#benefit-grid').innerHTML = BENEFITS.map(b =>
+      '<div class="benefit"><span class="b-ico">' + b.icon + '</span>' +
+      '<b>' + esc(b.title) + '</b><span>' + esc(b.text) + '</span></div>'
+    ).join('');
+  }
+
+  /* ───────── category detail ───────── */
+  function openCategory(key) {
+    const d = DOMAINS[key], c = CATEGORY[key], cov = COVERAGE[key], prev = PREVENTION[key];
+
+    $('#cat-title').textContent = d.name;
+    $('#cat-body').innerHTML =
+      '<div class="cat-hero">' +
+        '<span class="cat-ico">' + d.icon + '</span>' +
+        '<b>' + esc(c.lead) + '</b>' +
+        '<p>' + esc(c.body) + '</p>' +
+      '</div>' +
+
+      (c.note ? '<div class="notice"><b>ข้อมูลอ่อนไหว</b> — ' + esc(c.note) + '</div>' : '') +
+
+      '<div class="card"><h2>สัญญาณที่บอกว่าคุณเสี่ยงสูงในด้านนี้</h2>' +
+        c.signals.map(s => '<div class="reason"><span class="dot">▸</span><span>' + esc(s) + '</span></div>').join('') +
+      '</div>' +
+
+      '<div class="card"><h2>ประเภทความคุ้มครองที่เกี่ยวข้อง</h2>' +
+        '<p class="hint">ระบบไม่แนะนำผลิตภัณฑ์ของบริษัทใด และไม่ระบุเบี้ยประกัน</p>' +
+        '<ul class="limits">' + cov.kinds.map(k => '<li>' + esc(k) + '</li>').join('') + '</ul>' +
+      '</div>' +
+
+      '<div class="card card-info"><h2>' + prev.icon + ' ลดความเสี่ยงได้อย่างไร</h2>' +
+        '<p>' + esc(prev.text) + '</p>' +
+      '</div>';
+
+    Store.log('เปิดดูรายละเอียดหมวด: ' + d.name);
+    go('category');
+  }
+
+  /* ───────── tabbar ───────── */
+  function initTabs() {
+    $$('.tab').forEach(t => t.addEventListener('click', () => {
+      const dest = t.dataset.tab;
+
+      if (dest === 'profile') {
+        if (!Store.state.result) { toast('ยังไม่มีผลการประเมิน — เริ่มประเมินก่อนได้เลย'); return; }
+        renderProfile(Store.state.result);
+      }
+
+      if (dest === 'consent' && Store.state.consent.core) { startQuiz(); return; }
+
+      go(dest);
+    }));
   }
 
   /* ───────── consent ───────── */
@@ -357,19 +440,21 @@
 
   /* ───────── boot ───────── */
   function boot() {
+    renderHome();
+    initTabs();
     initConsent();
     initQuiz();
     initReview();
     initActions();
 
-    // กลับมาเปิดแอปอีกครั้งแล้วมีผลเดิมอยู่ → เสนอให้ดูผลเดิมได้เลย
+    // กลับมาเปิดแอปอีกครั้งแล้วมีผลเดิมอยู่ → เสนอให้ดูผลเดิมได้เลยจากหน้าแรก
     if (Store.state.result) {
       const btn = document.createElement('button');
-      btn.className = 'btn btn-ghost';
+      btn.className = 'btn btn-ghost btn-hero';
       btn.textContent = 'ดูผลการประเมินครั้งล่าสุด';
       btn.addEventListener('click', () => { renderProfile(Store.state.result); go('profile'); });
-      const anchor = $('#screen-welcome .foot-note');
-      anchor.parentNode.insertBefore(btn, anchor);
+      const trust = $('#screen-welcome .hero-trust');
+      trust.parentNode.insertBefore(btn, trust);
     }
 
     if ('serviceWorker' in navigator) {

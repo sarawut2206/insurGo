@@ -16,35 +16,78 @@
 
 <div id="app">
 
-  <!-- ══════════ 1. WELCOME ══════════ -->
+  <!-- ══════════ 1. HOME ══════════ -->
   <section class="screen active" id="screen-welcome">
+
+    <div class="appbar">
+      <img src="icons/logo.png" alt="" class="appbar-logo">
+      <div class="appbar-name">ประกันไปกับคุณ</div>
+      <button class="appbar-btn" data-go="mydata" aria-label="ข้อมูลของฉัน">☰</button>
+    </div>
+
     <div class="hero">
-      <img src="icons/logo.png" alt="ประกันไปกับคุณ" class="hero-logo">
-      <h1 class="hero-title">ประกันไปกับคุณ</h1>
-      <p class="hero-tagline">เข้าใจความเสี่ยง · แนะนำสิ่งที่ใช่ · ดูแลไปด้วยกัน</p>
+      <span class="hero-eyebrow">เครื่องมือประเมินความเสี่ยงส่วนบุคคล</span>
+      <h1 class="hero-title">รู้ความเสี่ยงของคุณ<br>ก่อนตัดสินใจซื้อประกัน</h1>
+      <p class="hero-sub">ตอบคำถาม 12 ข้อ ใช้เวลาไม่ถึง 2 นาที ระบบจะบอกว่าคุณเสี่ยงตรงไหน ยังขาดความคุ้มครองอะไร <b>พร้อมเหตุผลทุกข้อ</b></p>
+      <button class="btn btn-primary btn-hero" data-go="consent">เริ่มประเมินฟรี</button>
+      <button class="btn btn-ghost btn-hero" data-action="load-demo">ดูตัวอย่างผลลัพธ์</button>
+      <div class="hero-trust">
+        <span>ไม่ต้องสมัครสมาชิก</span>
+        <span>ไม่ขายประกัน</span>
+        <span>ลบข้อมูลได้ทุกเมื่อ</span>
+      </div>
     </div>
 
-    <div class="card">
-      <h2>ระบบนี้ทำอะไร</h2>
-      <ul class="feature-list">
-        <li><span class="ico">1</span><div><b>ประเมินความเสี่ยงของคุณ</b><span>ตอบคำถามสั้น ๆ ระบบสร้าง Risk Profile 5 ด้าน</span></div></li>
-        <li><span class="ico">2</span><div><b>หาช่องว่างความคุ้มครอง</b><span>บอกว่าคุณยังขาดความคุ้มครองด้านไหน พร้อมเหตุผล</span></div></li>
-        <li><span class="ico">3</span><div><b>แนะนำวิธีลดความเสี่ยง</b><span>สิ่งที่ทำได้ตั้งแต่วันนี้ ก่อนเกิดเหตุ</span></div></li>
-      </ul>
+    <h2 class="section-title">ประเมิน 5 ด้านความเสี่ยง</h2>
+    <p class="section-hint">กดที่แต่ละด้านเพื่อดูว่าครอบคลุมอะไรบ้าง</p>
+    <div class="cat-grid" id="cat-grid"></div>
+
+    <h2 class="section-title">ใช้งานอย่างไร</h2>
+    <div class="steps-flow">
+      <div class="step-card"><span class="step-n">1</span><div><b>ให้ความยินยอม</b><span>เลือกได้ว่าจะให้ข้อมูลไหนบ้าง แยกตามวัตถุประสงค์</span></div></div>
+      <div class="step-card"><span class="step-n">2</span><div><b>ตอบคำถาม 12 ข้อ</b><span>ทุกข้อบอกว่าถามไปทำไม และข้ามได้ทุกข้อ</span></div></div>
+      <div class="step-card"><span class="step-n">3</span><div><b>ดูผลพร้อมเหตุผล</b><span>คะแนน 5 ด้าน ช่องว่างความคุ้มครอง และวิธีลดความเสี่ยง</span></div></div>
+      <div class="step-card"><span class="step-n">4</span><div><b>ให้ผู้เชี่ยวชาญตรวจ</b><span>ระบบไม่ตัดสินแทนคุณ ส่งต่อให้คนตรวจทานได้</span></div></div>
     </div>
 
+    <h2 class="section-title">ทำไมต้องใช้เครื่องมือนี้</h2>
+    <p class="section-hint">ทุกข้อตรวจสอบได้จากตัวแอปเอง</p>
+    <div class="benefit-grid" id="benefit-grid"></div>
+
+    <h2 class="section-title">สิ่งที่ระบบนี้ไม่ทำ</h2>
     <div class="card card-warn">
-      <h2>สิ่งที่ระบบนี้ <u>ไม่ทำ</u></h2>
-      <p>ไม่อนุมัติหรือปฏิเสธการรับประกัน · ไม่กำหนดเบี้ยประกันจริง · ไม่ใช่คำแนะนำการลงทุนหรือการเงินเฉพาะบุคคล · ไม่แนะนำผลิตภัณฑ์ของบริษัทใดบริษัทหนึ่ง</p>
-      <p>ระบบแนะนำเป็น <b>ประเภทความคุ้มครอง</b> เท่านั้น การพิจารณารับประกันจริงเป็นหน้าที่ของบริษัทประกันภัยและผู้เชี่ยวชาญที่ได้รับใบอนุญาต</p>
+      <ul class="limits">
+        <li>ไม่อนุมัติหรือปฏิเสธการรับประกัน</li>
+        <li>ไม่คำนวณหรือเสนอเบี้ยประกันจริง</li>
+        <li>ไม่แนะนำผลิตภัณฑ์ของบริษัทใดบริษัทหนึ่ง</li>
+        <li>ไม่ใช่คำแนะนำการลงทุนหรือการเงินเฉพาะบุคคล</li>
+      </ul>
+      <p style="margin-top:10px">ระบบแนะนำเป็น <b>ประเภทความคุ้มครอง</b> เท่านั้น การพิจารณารับประกันจริงเป็นหน้าที่ของบริษัทประกันภัยและผู้เชี่ยวชาญที่ได้รับใบอนุญาต</p>
     </div>
 
-    <button class="btn btn-primary" data-go="consent">เริ่มต้น</button>
-    <button class="btn btn-ghost" data-action="load-demo">ดูตัวอย่างด้วยข้อมูลจำลอง</button>
-    <p class="foot-note">เวอร์ชันต้นแบบ · ข้อมูลทั้งหมดเก็บในเครื่องของคุณเท่านั้น</p>
+    <div class="cta-band">
+      <b>พร้อมรู้จักความเสี่ยงของตัวเองแล้วหรือยัง</b>
+      <span>ใช้เวลาไม่ถึง 2 นาที ไม่ต้องกรอกชื่อหรือเบอร์โทร</span>
+      <button class="btn btn-white" data-go="consent">เริ่มประเมินฟรี</button>
+    </div>
+
+    <footer class="foot">
+      <img src="icons/logo.png" alt="" class="foot-logo">
+      <b>ประกันไปกับคุณ</b>
+      <p>เข้าใจความเสี่ยง · แนะนำสิ่งที่ใช่ · ดูแลไปด้วยกัน</p>
+      <p class="foot-dim">ผลงานต้นแบบเพื่อนำเสนอแนวคิด ไม่ใช่ผลิตภัณฑ์ประกันภัย และไม่ใช่คำแนะนำทางการเงิน ข้อมูลที่แสดงในโหมดตัวอย่างเป็นข้อมูลจำลอง</p>
+      <p class="foot-dim">เวอร์ชันเครื่องมือ 0.9.0-prototype</p>
+    </footer>
   </section>
 
-  <!-- ══════════ 2. CONSENT (PDPA) ══════════ -->
+  <!-- ══════════ 2. CATEGORY DETAIL ══════════ -->
+  <section class="screen" id="screen-category">
+    <header class="topbar"><button class="back" data-go="welcome">←</button><h1 id="cat-title">–</h1></header>
+    <div id="cat-body"></div>
+    <button class="btn btn-primary" data-go="consent">ประเมินความเสี่ยงของฉัน</button>
+  </section>
+
+  <!-- ══════════ 3. CONSENT (PDPA) ══════════ -->
   <section class="screen" id="screen-consent">
     <header class="topbar"><button class="back" data-go="welcome">←</button><h1>ความยินยอมการใช้ข้อมูล</h1></header>
 
@@ -91,7 +134,7 @@
     <button class="btn btn-primary" id="btn-consent-next" disabled>ยินยอมและไปต่อ</button>
   </section>
 
-  <!-- ══════════ 3. QUESTIONNAIRE ══════════ -->
+  <!-- ══════════ 4. QUESTIONNAIRE ══════════ -->
   <section class="screen" id="screen-quiz">
     <header class="topbar">
       <button class="back" id="quiz-back">←</button>
@@ -104,7 +147,7 @@
     </div>
   </section>
 
-  <!-- ══════════ 4. ANALYZING ══════════ -->
+  <!-- ══════════ 5. ANALYZING ══════════ -->
   <section class="screen" id="screen-analyzing">
     <div class="analyzing">
       <div class="pulse"><img src="icons/logo.png" alt=""></div>
@@ -119,7 +162,7 @@
     </div>
   </section>
 
-  <!-- ══════════ 5. RISK PROFILE ══════════ -->
+  <!-- ══════════ 6. RISK PROFILE ══════════ -->
   <section class="screen" id="screen-profile">
     <header class="topbar"><button class="back" data-go="welcome">←</button><h1>Risk Profile ของคุณ</h1></header>
 
@@ -155,7 +198,7 @@
     <button class="btn btn-ghost" data-action="restart">ประเมินใหม่</button>
   </section>
 
-  <!-- ══════════ 6. HUMAN REVIEW ══════════ -->
+  <!-- ══════════ 7. HUMAN REVIEW ══════════ -->
   <section class="screen" id="screen-review">
     <header class="topbar"><button class="back" data-go="profile">←</button><h1>ส่งให้ผู้เชี่ยวชาญตรวจสอบ</h1></header>
 
@@ -188,9 +231,9 @@
     <div id="review-result"></div>
   </section>
 
-  <!-- ══════════ 7. MY DATA ══════════ -->
+  <!-- ══════════ 8. MY DATA ══════════ -->
   <section class="screen" id="screen-mydata">
-    <header class="topbar"><button class="back" data-go="profile">←</button><h1>ข้อมูลของฉัน</h1></header>
+    <header class="topbar"><button class="back" data-go="welcome">←</button><h1>ข้อมูลของฉัน</h1></header>
 
     <div class="card">
       <h2>ความยินยอมที่ให้ไว้</h2>
@@ -214,10 +257,19 @@
 
 </div>
 
+<!-- ══════════ BOTTOM NAVIGATION ══════════ -->
+<nav class="tabbar" id="tabbar">
+  <button data-tab="welcome" class="tab active"><span class="tab-ico">🏠</span>หน้าแรก</button>
+  <button data-tab="consent" class="tab"><span class="tab-ico">📝</span>ประเมิน</button>
+  <button data-tab="profile" class="tab"><span class="tab-ico">📊</span>ผลลัพธ์</button>
+  <button data-tab="mydata"  class="tab"><span class="tab-ico">🔒</span>ข้อมูลของฉัน</button>
+</nav>
+
 <div id="toast" class="toast"></div>
 
 <script src="js/questions.js"></script>
 <script src="js/config.js"></script>
+<script src="js/content.js"></script>
 <script src="js/engine.js"></script>
 <script src="js/store.js"></script>
 <script src="js/app.js"></script>
