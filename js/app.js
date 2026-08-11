@@ -90,10 +90,7 @@
       opt('', trip.transport ? '' : '— ยังไม่ระบุ —', !trip.transport) +
       Trip.TRANSPORT.map(m => opt(m.key, m.label, trip.transport === m.key)).join('');
 
-    // กิจกรรม
-    $('#f-activity').innerHTML =
-      opt('', trip.activity ? '' : '— ทั่วไป —', !trip.activity) +
-      Trip.ACTIVITY.map(a => opt(a.key, a.label, trip.activity === a.key)).join('');
+    renderActivities();
 
     // สิ่งที่ AI จับได้ พร้อมบอกว่าจับจากอะไร (โปร่งใส)
     $('#understood-notes').innerHTML = trip.found.length
@@ -125,6 +122,88 @@
     }
   }
 
+  /* ───────── กิจกรรม: เลือกหลายอย่าง + พิมพ์เพิ่มเอง ───────── */
+
+  const RISK_DOT = { high: '🔴', mid: '🟠', low: '🟢' };
+
+  function actChip(a, on) {
+    const guess = on && trip.guessed && trip.guessed.indexOf(a.id) !== -1;
+    return '<button type="button" class="act-chip' + (on ? ' on' : '') + (guess ? ' guessed' : '') + '" data-act="' + a.id + '"' +
+      (guess ? ' title="ระบบเลือกให้เบื้องต้น กดยกเลิกได้ถ้าไม่ตรง"' : '') + '>' +
+      '<span class="act-risk">' + RISK_DOT[a.risk] + '</span>' + (guess ? '✨ ' : '') + esc(a.label) + '</button>';
+  }
+
+  function renderActivities() {
+    const chosenIds = trip.activities;
+
+    // แถวที่ AI เสนอ — รับประกันอย่างน้อย 10 รายการ เรียงให้ที่เลือกแล้วอยู่ก่อน
+    const sug = trip.suggested.slice().sort((a, b) => {
+      const A = chosenIds.indexOf(a) !== -1 ? 0 : 1;
+      const B = chosenIds.indexOf(b) !== -1 ? 0 : 1;
+      return A - B;
+    });
+    $('#act-suggested').innerHTML = '<div class="chip-wrap">' +
+      sug.map(id => actChip(Trip.ACT_BY_ID[id], chosenIds.indexOf(id) !== -1)).join('') + '</div>';
+
+    // คลังทั้งหมดแบ่งตามหมวด
+    $('#act-catalog').innerHTML = Trip.ACT_CATS.map(c => {
+      const items = Trip.ACTIVITIES.filter(a => a.cat === c.key);
+      if (!items.length) return '';
+      return '<div class="act-cat"><div class="act-cat-label">' + c.label + '</div><div class="chip-wrap">' +
+        items.map(a => actChip(a, chosenIds.indexOf(a.id) !== -1)).join('') + '</div></div>';
+    }).join('');
+
+    // กิจกรรมที่ผู้ใช้พิมพ์เอง
+    $('#act-custom').innerHTML = trip.custom.length
+      ? '<div class="chip-wrap">' + trip.custom.map((txt, i) =>
+          '<span class="act-chip on custom">✏️ ' + esc(txt) + '<b class="act-x" data-idx="' + i + '">✕</b></span>').join('') + '</div>'
+      : '';
+
+    const total = chosenIds.length + trip.custom.length;
+    const g = (trip.guessed || []).filter(id => chosenIds.indexOf(id) !== -1).length;
+    $('#act-count').textContent = 'เลือกแล้ว ' + total + ' · เสนอ ' + trip.suggested.length + ' รายการ' +
+      (g ? ' · ✨ ระบบเดาให้ ' + g : '');
+
+    // ผูก event ทุกครั้งที่ render ใหม่
+    $$('#screen-analysis .act-chip[data-act]').forEach(b =>
+      b.addEventListener('click', () => toggleAct(b.dataset.act)));
+    $$('#act-custom .act-x').forEach(x =>
+      x.addEventListener('click', e => {
+        e.stopPropagation();
+        trip.custom.splice(parseInt(x.dataset.idx, 10), 1);
+        renderActivities(); renderRisks();
+      }));
+  }
+
+  function toggleAct(id) {
+    const i = trip.activities.indexOf(id);
+    if (i === -1) {
+      trip.activities.push(id);
+      // เลือกกิจกรรมที่ไม่ได้อยู่ในรายการเสนอ → ดันขึ้นแถวเสนอด้วย เพื่อไม่ให้หายไปจากสายตา
+      if (trip.suggested.indexOf(id) === -1) trip.suggested.push(id);
+    } else {
+      trip.activities.splice(i, 1);
+    }
+    renderActivities();
+    renderRisks();
+  }
+
+  function initActivities() {
+    const add = () => {
+      const v = $('#act-input').value.trim();
+      if (!v) return;
+      if (trip.custom.indexOf(v) === -1) trip.custom.push(v);
+      $('#act-input').value = '';
+      Store.log('ผู้ใช้เพิ่มกิจกรรมเอง: ' + v);
+      renderActivities();
+      renderRisks();
+    };
+    $('#act-add-btn').addEventListener('click', add);
+    $('#act-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); add(); }
+    });
+  }
+
   function currentTrip() {
     const placeText = $('#f-place').value.trim();
     const known = Trip.lookupPlace(placeText);
@@ -136,7 +215,8 @@
       place: known,
       abroad: $('#f-abroad').checked,
       transport: $('#f-transport').value,
-      activity: $('#f-activity').value
+      activities: trip.activities,
+      custom: trip.custom
     };
   }
 
@@ -151,13 +231,36 @@
   }
 
   function initAnalysis() {
-    ['f-people', 'f-days', 'f-transport', 'f-activity', 'f-abroad'].forEach(id =>
+    ['f-people', 'f-days', 'f-abroad'].forEach(id =>
       $('#' + id).addEventListener('change', renderRisks));
+
+    // เปลี่ยนวิธีเดินทาง → ปรับกิจกรรมการเดินทางให้ตรงกันอัตโนมัติ
+    $('#f-transport').addEventListener('change', () => {
+      const MAP = { moto: 'ridebike', car: 'longdrive', plane: 'flight', public: 'bus' };
+      Object.values(MAP).forEach(id => {
+        const i = trip.activities.indexOf(id);
+        if (i !== -1) trip.activities.splice(i, 1);
+      });
+      const now = MAP[$('#f-transport').value];
+      if (now) {
+        trip.activities.push(now);
+        if (trip.suggested.indexOf(now) === -1) trip.suggested.push(now);
+      }
+      renderActivities();
+      renderRisks();
+    });
 
     // ปลายทางเป็นช่องพิมพ์ — ต้องอัปเดตทั้งตอนพิมพ์และตอนเลือกจากรายการ
     $('#f-place').addEventListener('input', () => {
       const known = Trip.lookupPlace($('#f-place').value.trim());
-      if (known) $('#f-abroad').checked = known.abroad;   // เลือกที่รู้จัก → ตั้งค่าให้อัตโนมัติ
+      if (known) {
+        $('#f-abroad').checked = known.abroad;
+        // เปลี่ยนปลายทาง → เสนอกิจกรรมชุดใหม่ที่เข้ากับที่นั่น โดยคงที่เลือกไว้แล้ว
+        trip.suggested = Trip.suggestActivities(
+          { place: known, abroad: known.abroad, days: parseInt($('#f-days').value, 10) },
+          trip.activities);
+        renderActivities();
+      }
       updatePlaceNote();
       renderRisks();
     });
@@ -320,6 +423,7 @@
   function boot() {
     initHome();
     initAnalysis();
+    initActivities();
     initCheckout();
     renderInsurers();
 

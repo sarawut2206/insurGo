@@ -84,11 +84,89 @@ const Trip = (function () {
     { key: 'public', label: 'ขนส่งสาธารณะ',   words: ['รถทัวร์','รถไฟ','รถตู้','รถเมล์','แท็กซี่','รถบัส'] }
   ];
 
-  const ACTIVITY = [
-    { key: 'adventure', label: 'กิจกรรมผาดโผน', words: ['ดำน้ำ','ปีนเขา','เดินป่า','ล่องแก่ง','ปั่นจักรยาน','วิ่งมาราธอน','สกี','เซิร์ฟ','แคมป์','ตั้งแคมป์','พาราไกลดิ้ง','บันจี้'] },
-    { key: 'work',      label: 'ทำงาน/ประชุม',  words: ['ทำงาน','ประชุม','สัมมนา','อบรม','ดูงาน','ออกบูธ','ติดต่อธุรกิจ'] },
-    { key: 'leisure',   label: 'ท่องเที่ยว',    words: ['เที่ยว','พักผ่อน','ทริป','ไหว้พระ','กิน','ฮันนีมูน','ดูคอนเสิร์ต'] }
+  /* ═══════════ คลังกิจกรรม ═══════════
+     แต่ละกิจกรรมมี "ระดับความเสี่ยง" และ "แท็ก" ที่ใช้ส่งต่อไปยัง matching engine
+     tags: water=ทางน้ำ · road=ยานพาหนะ · height=ที่สูง · medical=เจ็บป่วย
+           baggage=สัมภาระ · vulnerable=กลุ่มเปราะบาง · night=กลางคืน */
+  const ACTIVITIES = [
+    // ── ทางน้ำและทะเล ──
+    { id: 'swim',      label: 'ว่ายน้ำทะเล',        cat: 'sea',  risk: 'mid',  tags: ['water'],            words: ['ว่ายน้ำ','เล่นน้ำ','ลงทะเล'] },
+    { id: 'snorkel',   label: 'ดำน้ำตื้น',          cat: 'sea',  risk: 'mid',  tags: ['water'],            words: ['ดำน้ำตื้น','สน็อกเกิล'] },
+    { id: 'scuba',     label: 'ดำน้ำลึก',           cat: 'sea',  risk: 'high', tags: ['water','extreme'],  words: ['ดำน้ำลึก','สกูบา','ดำน้ำ'] },
+    { id: 'jetski',    label: 'เจ็ตสกี / บานาน่าโบ๊ท', cat: 'sea', risk: 'high', tags: ['water','extreme'], words: ['เจ็ตสกี','บานาน่าโบ๊ท'] },
+    { id: 'kayak',     label: 'พายเรือคายัค / SUP',  cat: 'sea',  risk: 'mid',  tags: ['water'],            words: ['คายัค','พายเรือ','ซับบอร์ด'] },
+    { id: 'surf',      label: 'เซิร์ฟ / ไคท์เซิร์ฟ',  cat: 'sea',  risk: 'high', tags: ['water','extreme'],  words: ['เซิร์ฟ','โต้คลื่น','ไคท์'] },
+    { id: 'boat',      label: 'ล่องเรือ / ทัวร์เกาะ', cat: 'sea',  risk: 'mid',  tags: ['water'],            words: ['ล่องเรือ','ทัวร์เกาะ','นั่งเรือ','ไปเกาะ'] },
+    { id: 'fishing',   label: 'ตกปลา',              cat: 'sea',  risk: 'low',  tags: ['water'],            words: ['ตกปลา','ตกหมึก'] },
+    { id: 'beach',     label: 'เดินเล่นชายหาด',      cat: 'sea',  risk: 'low',  tags: [],                   words: ['ชายหาด','เดินหาด','อาบแดด'] },
+
+    // ── ภูเขาและธรรมชาติ ──
+    { id: 'hike',      label: 'เดินป่า / เดินเทรล',   cat: 'nature', risk: 'mid',  tags: ['extreme'],        words: ['เดินป่า','เทรล','เดินเขา'] },
+    { id: 'climb',     label: 'ปีนเขา / ปีนผา',      cat: 'nature', risk: 'high', tags: ['height','extreme'], words: ['ปีนเขา','ปีนผา','ปีนหน้าผา'] },
+    { id: 'camp',      label: 'ตั้งแคมป์ / กางเต็นท์', cat: 'nature', risk: 'mid',  tags: [],                 words: ['แคมป์','กางเต็นท์','นอนเต็นท์'] },
+    { id: 'raft',      label: 'ล่องแก่ง',            cat: 'nature', risk: 'high', tags: ['water','extreme'], words: ['ล่องแก่ง','แพยาง'] },
+    { id: 'waterfall', label: 'เที่ยวน้ำตก',         cat: 'nature', risk: 'mid',  tags: ['water'],           words: ['น้ำตก'] },
+    { id: 'viewpoint', label: 'ชมวิว / จุดชมวิว',    cat: 'nature', risk: 'low',  tags: [],                  words: ['ชมวิว','จุดชมวิว','ดูทะเลหมอก'] },
+    { id: 'zipline',   label: 'ซิปไลน์ / โรยตัว',    cat: 'nature', risk: 'high', tags: ['height','extreme'], words: ['ซิปไลน์','โรยตัว'] },
+    { id: 'stargaze',  label: 'ดูดาว',              cat: 'nature', risk: 'low',  tags: ['night'],           words: ['ดูดาว'] },
+    { id: 'elephant',  label: 'ขี่ช้าง / ให้อาหารสัตว์', cat: 'nature', risk: 'mid', tags: [],               words: ['ขี่ช้าง','ปางช้าง','ให้อาหารสัตว์','สวนสัตว์'] },
+
+    // ── การเดินทาง ──
+    { id: 'longdrive', label: 'ขับรถทางไกล',        cat: 'transit', risk: 'mid',  tags: ['road'],           words: ['ขับรถ','ขับไป','ขับเอง'] },
+    { id: 'ridebike',  label: 'ขี่มอเตอร์ไซค์',      cat: 'transit', risk: 'high', tags: ['road','extreme'], words: ['มอเตอร์ไซค์','มอไซค์','ขี่รถ','บิ๊กไบค์'] },
+    { id: 'flight',    label: 'เดินทางด้วยเครื่องบิน', cat: 'transit', risk: 'low', tags: ['baggage'],       words: ['เครื่องบิน','บินไป','ขึ้นเครื่อง'] },
+    { id: 'bus',       label: 'นั่งรถทัวร์ / รถไฟ',   cat: 'transit', risk: 'mid',  tags: ['road'],           words: ['รถทัวร์','รถไฟ','รถตู้','รถบัส'] },
+    { id: 'rentcar',   label: 'เช่ารถขับเอง',        cat: 'transit', risk: 'mid',  tags: ['road'],           words: ['เช่ารถ','รถเช่า'] },
+
+    // ── เมืองและทั่วไป ──
+    { id: 'shopping',  label: 'ช้อปปิ้ง / เที่ยวห้าง', cat: 'city', risk: 'low',  tags: ['baggage'],         words: ['ช้อปปิ้ง','ห้าง','ซื้อของ'] },
+    { id: 'cafe',      label: 'คาเฟ่ / ร้านอาหาร',   cat: 'city', risk: 'low',  tags: [],                   words: ['คาเฟ่','ร้านอาหาร','กินข้าว'] },
+    { id: 'temple',    label: 'ไหว้พระ / เที่ยววัด',  cat: 'city', risk: 'low',  tags: [],                   words: ['ไหว้พระ','วัด','ทำบุญ'] },
+    { id: 'museum',    label: 'พิพิธภัณฑ์ / แหล่งเรียนรู้', cat: 'city', risk: 'low', tags: [],              words: ['พิพิธภัณฑ์','นิทรรศการ'] },
+    { id: 'themepark', label: 'สวนสนุก / สวนน้ำ',    cat: 'city', risk: 'mid',  tags: ['water'],            words: ['สวนสนุก','สวนน้ำ','เครื่องเล่น'] },
+    { id: 'concert',   label: 'คอนเสิร์ต / เทศกาล',  cat: 'city', risk: 'mid',  tags: ['night'],            words: ['คอนเสิร์ต','เทศกาล','งานวัด','เคาท์ดาวน์'] },
+    { id: 'nightlife', label: 'เที่ยวกลางคืน / สถานบันเทิง', cat: 'city', risk: 'high', tags: ['night'],     words: ['กลางคืน','ผับ','บาร์','สถานบันเทิง'] },
+    { id: 'photo',     label: 'ถ่ายรูป / พกอุปกรณ์มีค่า', cat: 'city', risk: 'low', tags: ['baggage'],       words: ['ถ่ายรูป','กล้อง','โดรน'] },
+
+    // ── กีฬาและผาดโผน ──
+    { id: 'marathon',  label: 'วิ่งมาราธอน / งานวิ่ง', cat: 'sport', risk: 'mid',  tags: ['extreme'],        words: ['วิ่ง','มาราธอน','ฟันรัน'] },
+    { id: 'cycling',   label: 'ปั่นจักรยานทางไกล',   cat: 'sport', risk: 'high', tags: ['road','extreme'],  words: ['ปั่นจักรยาน','จักรยาน'] },
+    { id: 'ski',       label: 'สกี / สโนว์บอร์ด',     cat: 'sport', risk: 'high', tags: ['extreme'],         words: ['สกี','สโนว์บอร์ด','เล่นหิมะ'] },
+    { id: 'paraglide', label: 'พาราไกลดิ้ง / ร่มร่อน', cat: 'sport', risk: 'high', tags: ['height','extreme'], words: ['พาราไกลดิ้ง','ร่มร่อน','กระโดดร่ม'] },
+    { id: 'bungee',    label: 'บันจี้จัมพ์',          cat: 'sport', risk: 'high', tags: ['height','extreme'], words: ['บันจี้'] },
+    { id: 'atv',       label: 'ATV / รถวิบาก',       cat: 'sport', risk: 'high', tags: ['road','extreme'],  words: ['เอทีวี','atv','รถวิบาก','บักกี้'] },
+    { id: 'golf',      label: 'กอล์ฟ',              cat: 'sport', risk: 'low',  tags: [],                   words: ['กอล์ฟ','ตีกอล์ฟ'] },
+
+    // ── ทำงาน ──
+    { id: 'meeting',   label: 'ประชุม / สัมมนา',     cat: 'work', risk: 'low',  tags: [],                   words: ['ประชุม','สัมมนา','อบรม','ทำงาน'] },
+    { id: 'expo',      label: 'ออกบูธ / งานแสดงสินค้า', cat: 'work', risk: 'low', tags: ['baggage'],        words: ['ออกบูธ','งานแสดงสินค้า','จัดบูธ'] },
+    { id: 'fieldwork', label: 'ลงพื้นที่ / ตรวจงาน',  cat: 'work', risk: 'mid',  tags: ['road'],            words: ['ลงพื้นที่','ตรวจงาน','ดูงาน','ไซต์งาน'] },
+
+    // ── อาหารและสุขภาพ ──
+    { id: 'seafood',   label: 'กินอาหารทะเล',       cat: 'health', risk: 'mid',  tags: ['medical'],         words: ['อาหารทะเล','ซีฟู้ด'] },
+    { id: 'street',    label: 'กินสตรีทฟู้ด / อาหารพื้นเมือง', cat: 'health', risk: 'mid', tags: ['medical'], words: ['สตรีทฟู้ด','อาหารพื้นเมือง','อาหารท้องถิ่น'] },
+    { id: 'alcohol',   label: 'ดื่มแอลกอฮอล์',       cat: 'health', risk: 'high', tags: ['medical','night'], words: ['ดื่ม','เหล้า','เบียร์','สังสรรค์','ปาร์ตี้'] },
+    { id: 'spa',       label: 'สปา / นวดแผนไทย',     cat: 'health', risk: 'low',  tags: [],                  words: ['สปา','นวด'] },
+    { id: 'hotspring', label: 'ออนเซ็น / บ่อน้ำพุร้อน', cat: 'health', risk: 'mid', tags: ['water'],         words: ['ออนเซ็น','น้ำพุร้อน','แช่น้ำ'] },
+
+    // ── กลุ่มเปราะบาง ──
+    { id: 'kids',      label: 'เดินทางกับเด็กเล็ก',   cat: 'family', risk: 'mid',  tags: ['vulnerable','medical'], words: ['เด็กเล็ก','ลูกเล็ก','ทารก','พาลูก'] },
+    { id: 'elderly',   label: 'เดินทางกับผู้สูงอายุ',  cat: 'family', risk: 'high', tags: ['vulnerable','medical'], words: ['ผู้สูงอายุ','คนแก่','พ่อแม่','ยาย','ปู่','ย่า','ตา'] },
+    { id: 'pregnant',  label: 'เดินทางขณะตั้งครรภ์',  cat: 'family', risk: 'high', tags: ['vulnerable','medical'], words: ['ตั้งครรภ์','ท้อง'] }
   ];
+
+  const ACT_BY_ID = {};
+  ACTIVITIES.forEach(a => { ACT_BY_ID[a.id] = a; });
+
+  /* กิจกรรมที่เสนอตาม "ประเภทปลายทาง" — ใช้เติมให้ครบขั้นต่ำ 10 รายการเสมอ */
+  const BY_PLACE = {
+    sea:       ['swim','snorkel','boat','beach','seafood','jetski','kayak','scuba','fishing','surf'],
+    mountain:  ['hike','viewpoint','camp','waterfall','stargaze','climb','raft','elephant','street','zipline'],
+    upcountry: ['temple','street','viewpoint','cafe','longdrive','waterfall','museum','camp','photo','shopping'],
+    city:      ['shopping','cafe','temple','museum','photo','concert','nightlife','themepark','street','spa'],
+    abroad:    ['flight','shopping','cafe','museum','photo','street','temple','concert','longdrive','spa']
+  };
+  const GENERAL = ['cafe','photo','shopping','street','viewpoint','temple','museum','spa','beach','longdrive'];
 
   /* ═══════════ 1. เข้าใจสิ่งที่ผู้ใช้พิมพ์ ═══════════ */
   function understand(raw) {
@@ -131,15 +209,50 @@ const Trip = (function () {
     /* — ปลายทาง — */
     const place = PLACES_BY_LEN.find(p => t.indexOf(p.k) !== -1) || null;
 
-    /* — การเดินทาง / กิจกรรม — */
+    /* — การเดินทาง — */
     const transport = TRANSPORT.find(m => m.words.some(w => t.indexOf(w) !== -1)) || null;
-    const activity  = ACTIVITY.find(a => a.words.some(w => t.indexOf(w) !== -1)) || null;
+
+    /* — กิจกรรม (เลือกได้หลายอย่าง) —
+       ขั้นที่ 1: จับจากคำที่ผู้ใช้พูดตรง ๆ → เลือกให้เลย
+       ขั้นที่ 2: เติมจากบริบทปลายทางและวิธีเดินทาง → เสนอให้ผู้ใช้ติ๊กเอง */
+    const picked = [];   // เลือกให้อัตโนมัติ เพราะผู้ใช้พูดถึงตรง ๆ
+    ACTIVITIES.forEach(a => {
+      if (a.words.some(w => t.toLowerCase().indexOf(w.toLowerCase()) !== -1)) picked.push(a.id);
+    });
+
+    // วิธีเดินทางถือเป็นกิจกรรมด้วย เพราะเป็นความเสี่ยงจริงระหว่างทริป
+    const T2A = { moto: 'ridebike', car: 'longdrive', plane: 'flight', public: 'bus' };
+    if (transport && T2A[transport] && picked.indexOf(T2A[transport]) === -1) picked.push(T2A[transport]);
+
+    const suggested = suggestActivities({ place: place, abroad: place ? place.abroad : false, days: days || 1 }, picked);
+
+    /* ถ้าผู้ใช้ไม่ได้พูดถึงกิจกรรมเลย ระบบจะเลือกกิจกรรมที่แทบจะเกิดขึ้นแน่นอน
+       ของปลายทางแบบนั้นให้เบื้องต้น (เฉพาะความเสี่ยงต่ำถึงกลาง ไม่เดากิจกรรมเสี่ยงสูงให้ใคร)
+       และทำเครื่องหมายไว้ว่า "ระบบเดาให้" เพื่อให้ผู้ใช้ตรวจและปรับได้ */
+    const guessed = [];
+    if (picked.length < 3) {
+      suggested.forEach(id => {
+        const a = ACT_BY_ID[id];
+        if (picked.length >= 3) return;
+        if (!a || a.risk === 'high') return;
+        if (picked.indexOf(id) !== -1) return;
+        picked.push(id);
+        guessed.push(id);
+      });
+    }
 
     if (peopleFrom) found.push({ field: 'จำนวนคน', text: peopleFrom });
     if (daysFrom)   found.push({ field: 'ระยะเวลา', text: daysFrom });
     if (place)      found.push({ field: 'ปลายทาง',  text: 'รู้จัก "' + place.k + '" — ' + place.note });
     if (transport)  found.push({ field: 'การเดินทาง', text: 'พบว่าเดินทางด้วย' + transport.label });
-    if (activity)   found.push({ field: 'กิจกรรม',  text: 'พบว่าเป็น' + activity.label });
+    const said = picked.filter(id => guessed.indexOf(id) === -1);
+    if (said.length) {
+      found.push({ field: 'กิจกรรม', text: 'จับได้จากที่คุณเล่าโดยตรง: ' + said.map(id => ACT_BY_ID[id].label).join(', ') });
+    }
+    if (guessed.length) {
+      found.push({ field: 'กิจกรรม (ระบบเสนอ)', text: 'คุณไม่ได้ระบุกิจกรรม ระบบจึงเลือกที่พบบ่อยของปลายทางแบบนี้ให้เบื้องต้น: ' +
+        guessed.map(id => ACT_BY_ID[id].label).join(', ') + ' — กดยกเลิกได้ถ้าไม่ตรง' });
+    }
 
     const missing = [];
     if (!people)    missing.push('จำนวนคน');
@@ -155,9 +268,71 @@ const Trip = (function () {
       placeText: place ? place.k : '',
       abroad: place ? place.abroad : false,
       transport: transport ? transport.key : '',
-      activity: activity ? activity.key : '',
+      activities: picked,      // กิจกรรมที่ถูกเลือกไว้แล้ว
+      guessed: guessed,        // ในนั้น อันไหนที่ระบบเดาให้ ไม่ได้มาจากคำพูดผู้ใช้
+      suggested: suggested,    // กิจกรรมที่เสนอให้ติ๊กเพิ่ม (อย่างน้อย 10 รายการรวมที่เลือกแล้ว)
+      custom: [],              // กิจกรรมที่ผู้ใช้พิมพ์เพิ่มเอง
       found: found,
       missing: missing
+    };
+  }
+
+  /* เสนอกิจกรรมที่เป็นไปได้จากบริบททริป — รับประกันว่าได้อย่างน้อย 10 รายการเสมอ */
+  function suggestActivities(ctx, already) {
+    const out = (already || []).slice();
+    const push = id => { if (ACT_BY_ID[id] && out.indexOf(id) === -1) out.push(id); };
+
+    const kind = ctx.abroad ? 'abroad' : (ctx.place ? ctx.place.kind : null);
+    (BY_PLACE[kind] || []).forEach(push);
+
+    if (ctx.abroad) { push('flight'); push('street'); }
+    if (ctx.days >= 4) push('spa');
+
+    // เติมจากกิจกรรมทั่วไปจนครบขั้นต่ำ 10 รายการ
+    GENERAL.forEach(id => { if (out.length < 10) push(id); });
+    // ถ้ายังไม่ครบจริง ๆ (กรณีหายาก) เติมจากคลังทั้งหมด
+    ACTIVITIES.forEach(a => { if (out.length < 10) push(a.id); });
+
+    return out;
+  }
+
+  /* จัดกลุ่มกิจกรรมทั้งหมดไว้ให้ UI แสดงเป็นหมวด */
+  const ACT_CATS = [
+    { key: 'sea',     label: '🌊 ทางน้ำและทะเล' },
+    { key: 'nature',  label: '⛰️ ภูเขาและธรรมชาติ' },
+    { key: 'transit', label: '🚗 การเดินทาง' },
+    { key: 'city',    label: '🏙️ เมืองและทั่วไป' },
+    { key: 'sport',   label: '🏃 กีฬาและผาดโผน' },
+    { key: 'work',    label: '💼 ทำงาน' },
+    { key: 'health',  label: '🍽️ อาหารและสุขภาพ' },
+    { key: 'family',  label: '👨‍👩‍👧 กลุ่มที่ต้องดูแลพิเศษ' }
+  ];
+
+  /* วิเคราะห์กิจกรรมที่เลือก → สรุปเป็นแท็กความเสี่ยง */
+  function activityProfile(ids, custom) {
+    const list = (ids || []).map(id => ACT_BY_ID[id]).filter(Boolean);
+    const tags = {};
+    let high = 0, mid = 0;
+
+    list.forEach(a => {
+      a.tags.forEach(t => { tags[t] = true; });
+      if (a.risk === 'high') high++;
+      else if (a.risk === 'mid') mid++;
+    });
+
+    // กิจกรรมที่ผู้ใช้พิมพ์เอง — สแกนหาคำเสี่ยงเพื่อจัดระดับอย่างระมัดระวัง
+    (custom || []).forEach(txt => {
+      const s = String(txt);
+      if (/ดำน้ำ|ปีน|กระโดด|แข่ง|วิบาก|สกี|โต้คลื่น|ล่องแก่ง|ผาดโผน|เสี่ยง/.test(s)) { high++; tags.extreme = true; }
+      else mid++;
+    });
+
+    return {
+      list: list,
+      tags: tags,
+      highCount: high,
+      midCount: mid,
+      isAdventure: high > 0 || !!tags.extreme
     };
   }
 
@@ -171,19 +346,28 @@ const Trip = (function () {
   /* ═══════════ 2. แปลงทริปเป็นความเสี่ยง ═══════════ */
   function risks(trip) {
     const out = [];
-    const T = trip.transport, A = trip.activity, P = trip.place;
+    const P = trip.place;
+    const prof = activityProfile(trip.activities, trip.custom);
+    const tag = t => !!prof.tags[t];
 
-    if (T === 'moto')   out.push({ icon: '🛵', title: 'อุบัติเหตุจากรถจักรยานยนต์', why: 'จักรยานยนต์เป็นพาหนะที่มีความเสี่ยงบาดเจ็บสูงที่สุดในการเดินทางทั่วไป' });
-    if (T === 'car')    out.push({ icon: '🚗', title: 'อุบัติเหตุจากการขับขี่', why: 'เดินทางด้วยรถยนต์ ระยะทางไกลเพิ่มโอกาสเกิดเหตุและความอ่อนล้า' });
-    if (T === 'plane')  out.push({ icon: '🧳', title: 'สัมภาระและเที่ยวบิน', why: 'การเดินทางด้วยเครื่องบินมีความเสี่ยงเรื่องสัมภาระสูญหายและเที่ยวบินล่าช้า' });
-    if (T === 'public') out.push({ icon: '🚌', title: 'อุบัติเหตุระหว่างโดยสาร', why: 'เดินทางด้วยขนส่งสาธารณะ ควบคุมปัจจัยความปลอดภัยเองได้น้อย' });
+    // ── ความเสี่ยงจากกิจกรรมที่เลือก ──
+    if (tag('road'))    out.push({ icon: '🛣️', title: 'อุบัติเหตุจากยานพาหนะ', why: 'ทริปนี้มีการเดินทางบนถนน ซึ่งเป็นสาเหตุการบาดเจ็บอันดับต้นของการท่องเที่ยว' });
+    if (tag('water'))   out.push({ icon: '🌊', title: 'อุบัติเหตุทางน้ำ', why: 'กิจกรรมทางน้ำที่คุณเลือกมีความเสี่ยงจมน้ำหรือบาดเจ็บ ซึ่งบางกรมธรรม์มีเงื่อนไขเฉพาะ' });
+    if (tag('height'))  out.push({ icon: '🧗', title: 'กิจกรรมบนที่สูง', why: 'กิจกรรมบนที่สูงมักถูกระบุเป็นข้อยกเว้น ต้องเลือกแผนที่ขยายความคุ้มครองส่วนนี้' });
+    if (tag('medical')) out.push({ icon: '🤒', title: 'เจ็บป่วยระหว่างเดินทาง', why: 'อาหารและสภาพแวดล้อมที่ไม่คุ้นเคยเพิ่มโอกาสเจ็บป่วย ซึ่ง PA ทั่วไปไม่คุ้มครอง' });
+    if (tag('baggage')) out.push({ icon: '🧳', title: 'สัมภาระและทรัพย์สิน', why: 'มีโอกาสสัมภาระสูญหาย เสียหาย หรือมาถึงล่าช้า' });
+    if (tag('night'))   out.push({ icon: '🌙', title: 'กิจกรรมช่วงกลางคืน', why: 'ทัศนวิสัยต่ำและแอลกอฮอล์เพิ่มความเสี่ยงอุบัติเหตุ และหลายกรมธรรม์ยกเว้นกรณีมึนเมา' });
+    if (tag('vulnerable')) out.push({ icon: '👶', title: 'มีผู้ที่ต้องดูแลพิเศษร่วมเดินทาง', why: 'เด็กเล็ก ผู้สูงอายุ หรือผู้ตั้งครรภ์ มีเงื่อนไขการรับประกันและความคุ้มครองต่างจากผู้ใหญ่ทั่วไป' });
 
-    if (P && P.kind === 'mountain')  out.push({ icon: '⛰️', title: 'เส้นทางภูเขาและพื้นที่ธรรมชาติ', why: P.note });
-    if (P && P.kind === 'sea')       out.push({ icon: '🌊', title: 'กิจกรรมทางน้ำ', why: 'ปลายทางติดทะเล มีโอกาสทำกิจกรรมทางน้ำที่เพิ่มความเสี่ยง' });
-    if (P && P.kind === 'upcountry') out.push({ icon: '🛣️', title: 'เดินทางระยะไกล', why: 'ระยะทางไกลทำให้เหนื่อยล้าสะสม ซึ่งเป็นสาเหตุอุบัติเหตุที่พบบ่อย' });
+    if (prof.highCount >= 2) {
+      out.push({ icon: '⚠️', title: 'มีกิจกรรมเสี่ยงสูง ' + prof.highCount + ' อย่าง',
+        why: 'ยิ่งมีกิจกรรมเสี่ยงสูงหลายอย่างในทริปเดียว ยิ่งต้องตรวจข้อยกเว้นให้ละเอียดก่อนเลือกแผน' });
+    }
+
+    // ── ความเสี่ยงจากปลายทางและขนาดทริป ──
+    if (P && P.kind === 'mountain')  out.push({ icon: '⛰️', title: 'เส้นทางภูเขา', why: P.note });
+    if (P && P.kind === 'upcountry') out.push({ icon: '🚙', title: 'เดินทางระยะไกล', why: 'ระยะทางไกลทำให้เหนื่อยล้าสะสม ซึ่งเป็นสาเหตุอุบัติเหตุที่พบบ่อย' });
     if (trip.abroad)                 out.push({ icon: '🏥', title: 'ค่ารักษาพยาบาลในต่างประเทศ', why: 'ค่ารักษาในต่างประเทศสูงกว่าในไทยมาก และสิทธิรักษาพยาบาลของไทยไม่ครอบคลุม' });
-
-    if (A === 'adventure') out.push({ icon: '🧗', title: 'กิจกรรมผาดโผน', why: 'กิจกรรมประเภทนี้มักมีเงื่อนไขเฉพาะในกรมธรรม์ ต้องตรวจว่าคุ้มครองหรือยกเว้น' });
 
     if (trip.people >= 3) out.push({ icon: '👨‍👩‍👧', title: 'เดินทางเป็นกลุ่ม ' + trip.people + ' คน', why: 'ทุกคนในกลุ่มต้องมีความคุ้มครอง ไม่ใช่เฉพาะผู้จอง' });
     if (trip.days >= 5)   out.push({ icon: '📅', title: 'ทริประยะยาว ' + trip.days + ' วัน', why: 'ยิ่งอยู่นาน โอกาสเจอเหตุไม่คาดฝันยิ่งสะสมมากขึ้น' });
@@ -313,6 +497,7 @@ const Trip = (function () {
   function match(trip) {
     const abroad = !!trip.abroad;
     const excluded = [];
+    const prof = activityProfile(trip.activities, trip.custom);
 
     const scored = PLANS.map(p => {
       let score = 0;
@@ -337,10 +522,16 @@ const Trip = (function () {
         return null;
       }
 
-      if (p.fit.abroad === true) { score += 60; reasons.push('ปลายทางอยู่ต่างประเทศ แผนนี้เน้นค่ารักษาพยาบาลนอกประเทศ'); }
+      // ทริปต่างประเทศ ค่ารักษาพยาบาลคือความเสี่ยงที่ใหญ่ที่สุด
+      // จึงให้น้ำหนักมากพอที่แผนคุ้มครองค่ารักษาจะมาก่อนแผนเสริมอย่างสัมภาระเสมอ
+      if (p.fit.abroad === true) { score += 90; reasons.push('ปลายทางอยู่ต่างประเทศ แผนนี้เน้นค่ารักษาพยาบาลนอกประเทศ ซึ่งสิทธิรักษาพยาบาลไทยไม่ครอบคลุม'); }
       if (p.fit.minPeople)       { score += 30; reasons.push('เดินทาง ' + trip.people + ' คน ตรงกับแผนสำหรับกลุ่มตั้งแต่ ' + p.fit.minPeople + ' คน'); }
-      if (p.fit.activity && trip.activity && p.fit.activity.indexOf(trip.activity) !== -1) {
-        score += 45; reasons.push('ทริปมีกิจกรรมผาดโผน แผนนี้ขยายความคุ้มครองส่วนนี้ให้');
+
+      // กิจกรรมที่เลือกไว้เป็นตัวชี้ขาดหลักในการจับคู่
+      if (p.fit.activity && prof.isAdventure) {
+        const risky = prof.list.filter(a => a.risk === 'high').map(a => a.label);
+        score += 45;
+        reasons.push('ทริปมีกิจกรรมเสี่ยงสูง' + (risky.length ? ' (' + risky.slice(0, 2).join(', ') + ')' : '') + ' แผนนี้ขยายความคุ้มครองส่วนนี้ให้');
       }
       if (p.fit.transport && trip.transport && p.fit.transport.indexOf(trip.transport) !== -1) {
         score += 25;
@@ -348,12 +539,26 @@ const Trip = (function () {
         reasons.push('เหมาะกับการเดินทางด้วย' + label);
       }
       if (!Object.keys(p.fit).length) { score += 10; reasons.push('เป็นแผนพื้นฐานที่ใช้ได้กับทริปทั่วไป'); }
-      if (trip.days >= 3 && p.type === 'สุขภาพ') { score += 15; reasons.push('ทริปยาว ' + trip.days + ' วัน ความเสี่ยงเจ็บป่วยระหว่างทางสูงขึ้น'); }
+
+      // มีกิจกรรมเสี่ยงเจ็บป่วย → ดันแผนสุขภาพขึ้น เพราะ PA ไม่คุ้มครองการเจ็บป่วย
+      if (p.type === 'สุขภาพ' && prof.tags.medical) {
+        score += 35; reasons.push('ทริปมีความเสี่ยงเจ็บป่วย (เช่น อาหารหรือสภาพแวดล้อมที่ไม่คุ้นเคย) ซึ่งประกันอุบัติเหตุทั่วไปไม่คุ้มครอง');
+      }
+      if (p.type === 'สัมภาระ' && prof.tags.baggage) {
+        score += 30; reasons.push('ทริปมีสัมภาระหรือทรัพย์สินที่ต้องดูแล');
+      }
+      if (trip.days >= 3 && p.type === 'สุขภาพ') { score += 10; reasons.push('ทริปยาว ' + trip.days + ' วัน ความเสี่ยงเจ็บป่วยระหว่างทางสูงขึ้น'); }
 
       score += Math.max(0, 12 - p.rate / 8);
 
-      const warn = (trip.activity === 'adventure' && p.excludes.some(e => e.indexOf('ผาดโผน') !== -1))
-        ? 'ทริปนี้มีกิจกรรมผาดโผน แต่แผนนี้ระบุยกเว้นไว้ ควรตรวจเงื่อนไขก่อน' : null;
+      // แผนที่ยกเว้นกิจกรรมหลักของผู้ใช้ ต้องไม่ถูกจัดอันดับต้น ๆ
+      // มิฉะนั้นระบบจะแนะนำสิ่งที่ไม่คุ้มครองสิ่งที่ผู้ใช้ตั้งใจจะไปทำจริง ๆ
+      const risky = prof.list.filter(a => a.risk === 'high').map(a => a.label);
+      const warn = (prof.isAdventure && p.excludes.some(e => e.indexOf('ผาดโผน') !== -1))
+        ? 'ทริปนี้มีกิจกรรมเสี่ยงสูง' + (risky.length ? ' (' + risky.slice(0, 2).join(', ') + ')' : '') +
+          ' แต่แผนนี้ระบุยกเว้นกิจกรรมผาดโผนไว้ ควรตรวจเงื่อนไขก่อน'
+        : null;
+      if (warn) score -= 50;
 
       const total = p.rate * trip.people * trip.days;
 
@@ -371,7 +576,9 @@ const Trip = (function () {
   return {
     understand: understand, lookupPlace: lookupPlace,
     risks: risks, match: match,
-    TRANSPORT: TRANSPORT, ACTIVITY: ACTIVITY, PLACES: PLACES, PARTNERS: PARTNERS
+    suggestActivities: suggestActivities, activityProfile: activityProfile,
+    TRANSPORT: TRANSPORT, PLACES: PLACES, PARTNERS: PARTNERS,
+    ACTIVITIES: ACTIVITIES, ACT_BY_ID: ACT_BY_ID, ACT_CATS: ACT_CATS
   };
 })();
 

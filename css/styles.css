@@ -454,6 +454,48 @@ html, body {
 .place-ok { background: var(--surface-2); color: var(--text-dim); border-left: 3px solid var(--risk-low); }
 .place-unknown { background: var(--surface-2); color: var(--text-dim); border-left: 3px solid var(--risk-mid); }
 
+/* ─── ชิปกิจกรรม (เลือกได้หลายอย่าง) ─── */
+.act-count {
+  font-size: 11px; font-weight: 700; color: var(--teal); background: var(--surface-2);
+  padding: 2px 9px; border-radius: 20px; vertical-align: middle; white-space: nowrap;
+}
+.chip-wrap { display: flex; flex-wrap: wrap; gap: 7px; margin: 4px 0 12px; }
+.act-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--surface-2); border: 1.5px solid var(--line); border-radius: 30px;
+  padding: 8px 13px; font-family: inherit; font-size: 13px; color: var(--text-dim);
+  cursor: pointer; transition: border-color .15s, color .15s, background .15s;
+}
+.act-chip.on {
+  border-color: var(--teal); color: var(--text); font-weight: 600;
+  background: color-mix(in srgb, var(--teal) 12%, var(--surface));
+}
+.act-chip.on::after { content: "✓"; color: var(--teal); font-weight: 800; margin-left: 2px; }
+.act-chip.guessed { border-style: dashed; }
+.act-chip.custom::after { content: none; }
+.act-risk { font-size: 8px; line-height: 1; }
+.act-x { margin-left: 4px; opacity: .6; cursor: pointer; font-size: 12px; }
+.act-x:hover { opacity: 1; }
+
+.act-add { display: flex; gap: 8px; margin-bottom: 10px; }
+.act-add input {
+  flex: 1; font-family: inherit; font-size: 14px; color: var(--text);
+  background: var(--surface-2); border: 1.5px solid var(--line); border-radius: 11px;
+  padding: 11px 13px; outline: none; min-width: 0;
+}
+.act-add input:focus { border-color: var(--teal); }
+.act-add input::placeholder { color: var(--text-dim); opacity: .7; }
+.act-add button {
+  border: 0; border-radius: 11px; padding: 0 18px; font-family: inherit; font-size: 14px;
+  font-weight: 700; color: #fff; cursor: pointer; flex-shrink: 0;
+  background: linear-gradient(100deg, var(--navy), var(--teal));
+}
+
+.act-all { margin-top: 4px; }
+.act-all summary { font-size: 13px; color: var(--teal); font-weight: 700; cursor: pointer; padding: 6px 0; }
+.act-cat { margin-top: 10px; }
+.act-cat-label { font-size: 12px; font-weight: 700; color: var(--text-dim); margin-bottom: 6px; }
+
 /* ─── ตารางทุนประกัน ─── */
 .sum-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 2px; }
 .sum-table td { padding: 8px 0; border-bottom: 1px solid var(--line); vertical-align: top; color: var(--text-dim); }

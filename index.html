@@ -66,11 +66,8 @@
           <input id="f-place" list="place-options" autocomplete="off" placeholder="เช่น ชลบุรี, เชียงใหม่, ญี่ปุ่น">
           <datalist id="place-options"></datalist>
         </label>
-        <label>🚗 เดินทางด้วย
+        <label style="grid-column:1/-1">🚗 เดินทางด้วย
           <select id="f-transport"></select>
-        </label>
-        <label>🎯 กิจกรรมหลัก
-          <select id="f-activity"></select>
         </label>
       </div>
 
@@ -84,6 +81,21 @@
     </div>
 
     <div id="missing-notice"></div>
+
+    <div class="card">
+      <h2>🎯 กิจกรรมในทริปนี้ <span class="act-count" id="act-count"></span></h2>
+      <p class="hint">AI เลือกจากที่คุณเล่าให้แล้ว และเสนอกิจกรรมที่มักเกิดขึ้นในทริปแบบนี้เพิ่มเติม — <b>กดเลือกได้หลายอย่าง</b> ยิ่งเลือกครบ ระบบยิ่งจับคู่ความคุ้มครองได้แม่นขึ้น</p>
+
+      <div id="act-suggested"></div>
+
+      <div class="act-add">
+        <input id="act-input" placeholder="พิมพ์กิจกรรมอื่นที่ไม่มีในรายการ" autocomplete="off">
+        <button id="act-add-btn" type="button">เพิ่ม</button>
+      </div>
+      <div id="act-custom"></div>
+
+      <details class="act-all"><summary>ดูกิจกรรมทั้งหมดตามหมวด</summary><div id="act-catalog"></div></details>
+    </div>
 
     <div class="card">
       <h2>⚠️ ความเสี่ยงของทริปนี้</h2>
