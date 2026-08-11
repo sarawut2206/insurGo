@@ -9,268 +9,159 @@
 <link rel="apple-touch-icon" href="icons/logo.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="description" content="เข้าใจความเสี่ยงของคุณ ก่อนตัดสินใจเรื่องประกัน">
+<meta name="description" content="บอกเราว่าคุณกำลังจะไปไหน เราจะช่วยดูว่าคุณกำลังเสี่ยงอะไร">
 <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
 <div id="app">
 
-  <!-- ══════════ 1. HOME ══════════ -->
-  <section class="screen active" id="screen-welcome">
-
+  <!-- ══════════ 1. HOME — พิมพ์ทริป ══════════ -->
+  <section class="screen active" id="screen-home">
     <div class="appbar">
       <img src="icons/logo.png" alt="" class="appbar-logo">
       <div class="appbar-name">ประกันไปกับคุณ</div>
-      <button class="appbar-btn" data-go="mydata" aria-label="ข้อมูลของฉัน">☰</button>
     </div>
 
-    <div class="hero">
-      <span class="hero-eyebrow">เครื่องมือประเมินความเสี่ยงส่วนบุคคล</span>
-      <h1 class="hero-title">รู้ความเสี่ยงของคุณ<br>ก่อนตัดสินใจซื้อประกัน</h1>
-      <p class="hero-sub">ตอบคำถาม 12 ข้อ ใช้เวลาไม่ถึง 2 นาที ระบบจะบอกว่าคุณเสี่ยงตรงไหน ยังขาดความคุ้มครองอะไร <b>พร้อมเหตุผลทุกข้อ</b></p>
-      <button class="btn btn-primary btn-hero" data-go="consent">เริ่มประเมินฟรี</button>
-      <button class="btn btn-ghost btn-hero" data-action="load-demo">ดูตัวอย่างผลลัพธ์</button>
-      <div class="hero-trust">
-        <span>ไม่ต้องสมัครสมาชิก</span>
-        <span>ไม่ขายประกัน</span>
-        <span>ลบข้อมูลได้ทุกเมื่อ</span>
-      </div>
+    <div class="hero hero-simple">
+      <h1 class="hero-title">คุณกำลังจะไปไหน?</h1>
+      <p class="hero-sub">บอกเราเหมือนเล่าให้เพื่อนฟัง แล้ว AI จะช่วยดูว่าคุณกำลังเสี่ยงอะไร และหาความคุ้มครองที่เหมาะกับทริปนี้</p>
     </div>
 
-    <h2 class="section-title">ประเมิน 5 ด้านความเสี่ยง</h2>
-    <p class="section-hint">กดที่แต่ละด้านเพื่อดูว่าครอบคลุมอะไรบ้าง</p>
-    <div class="cat-grid" id="cat-grid"></div>
-
-    <h2 class="section-title">ใช้งานอย่างไร</h2>
-    <div class="steps-flow">
-      <div class="step-card"><span class="step-n">1</span><div><b>ให้ความยินยอม</b><span>เลือกได้ว่าจะให้ข้อมูลไหนบ้าง แยกตามวัตถุประสงค์</span></div></div>
-      <div class="step-card"><span class="step-n">2</span><div><b>ตอบคำถาม 12 ข้อ</b><span>ทุกข้อบอกว่าถามไปทำไม และข้ามได้ทุกข้อ</span></div></div>
-      <div class="step-card"><span class="step-n">3</span><div><b>ดูผลพร้อมเหตุผล</b><span>คะแนน 5 ด้าน ช่องว่างความคุ้มครอง และวิธีลดความเสี่ยง</span></div></div>
-      <div class="step-card"><span class="step-n">4</span><div><b>ให้ผู้เชี่ยวชาญตรวจ</b><span>ระบบไม่ตัดสินแทนคุณ ส่งต่อให้คนตรวจทานได้</span></div></div>
+    <div class="trip-box">
+      <textarea id="trip-input" rows="3" placeholder="เช่น ผมจะพาลูก 2 คนไปเที่ยวเขาใหญ่ 2 วัน"></textarea>
+      <button class="btn btn-primary" id="btn-analyze">🤖 วิเคราะห์ทริปของฉัน</button>
     </div>
 
-    <h2 class="section-title">ทำไมต้องใช้เครื่องมือนี้</h2>
-    <p class="section-hint">ทุกข้อตรวจสอบได้จากตัวแอปเอง</p>
-    <div class="benefit-grid" id="benefit-grid"></div>
+    <p class="section-hint" style="margin-top:14px">หรือลองตัวอย่างเหล่านี้</p>
+    <div id="example-list" class="example-list"></div>
 
-    <h2 class="section-title">สิ่งที่ระบบนี้ไม่ทำ</h2>
-    <div class="card card-warn">
-      <ul class="limits">
-        <li>ไม่อนุมัติหรือปฏิเสธการรับประกัน</li>
-        <li>ไม่คำนวณหรือเสนอเบี้ยประกันจริง</li>
-        <li>ไม่แนะนำผลิตภัณฑ์ของบริษัทใดบริษัทหนึ่ง</li>
-        <li>ไม่ใช่คำแนะนำการลงทุนหรือการเงินเฉพาะบุคคล</li>
-      </ul>
-      <p style="margin-top:10px">ระบบแนะนำเป็น <b>ประเภทความคุ้มครอง</b> เท่านั้น การพิจารณารับประกันจริงเป็นหน้าที่ของบริษัทประกันภัยและผู้เชี่ยวชาญที่ได้รับใบอนุญาต</p>
-    </div>
-
-    <div class="cta-band">
-      <b>พร้อมรู้จักความเสี่ยงของตัวเองแล้วหรือยัง</b>
-      <span>ใช้เวลาไม่ถึง 2 นาที ไม่ต้องกรอกชื่อหรือเบอร์โทร</span>
-      <button class="btn btn-white" data-go="consent">เริ่มประเมินฟรี</button>
+    <div class="mini-journey">
+      <span>เล่าทริป</span>→<span>AI วิเคราะห์</span>→<span>เห็นความเสี่ยง</span>→<span>เทียบแผน</span>→<span>คุ้มครอง</span>
     </div>
 
     <footer class="foot">
-      <img src="icons/logo.png" alt="" class="foot-logo">
-      <b>ประกันไปกับคุณ</b>
-      <p>เข้าใจความเสี่ยง · แนะนำสิ่งที่ใช่ · ดูแลไปด้วยกัน</p>
-      <p class="foot-dim">ผลงานต้นแบบเพื่อนำเสนอแนวคิด ไม่ใช่ผลิตภัณฑ์ประกันภัย และไม่ใช่คำแนะนำทางการเงิน ข้อมูลที่แสดงในโหมดตัวอย่างเป็นข้อมูลจำลอง</p>
-      <p class="foot-dim">เวอร์ชันเครื่องมือ 0.9.0-prototype</p>
+      <p class="foot-dim">ต้นแบบเพื่อนำเสนอแนวคิด · บริษัทพันธมิตรและเบี้ยประกันทั้งหมดเป็นข้อมูลสมมติ ไม่ใช่ข้อเสนอจริง</p>
+      <p class="foot-dim">ข้อความที่พิมพ์ถูกวิเคราะห์ในเครื่องของคุณ ไม่ถูกส่งออกไปที่ใด · <a href="#" id="link-b2b">สำหรับบริษัทประกันภัย</a> · <a href="#" id="link-clear">ลบข้อมูล</a></p>
     </footer>
   </section>
 
-  <!-- ══════════ 2. CATEGORY DETAIL ══════════ -->
-  <section class="screen" id="screen-category">
-    <header class="topbar"><button class="back" data-go="welcome">←</button><h1 id="cat-title">–</h1></header>
-    <div id="cat-body"></div>
-    <button class="btn btn-primary" data-go="consent">ประเมินความเสี่ยงของฉัน</button>
-  </section>
+  <!-- ══════════ 2. ANALYSIS — AI เข้าใจว่าอะไร + แก้ได้ ══════════ -->
+  <section class="screen" id="screen-analysis">
+    <header class="topbar"><button class="back" data-go="home">←</button><h1>AI วิเคราะห์ทริปของคุณ</h1></header>
 
-  <!-- ══════════ 3. CONSENT (PDPA) ══════════ -->
-  <section class="screen" id="screen-consent">
-    <header class="topbar"><button class="back" data-go="welcome">←</button><h1>ความยินยอมการใช้ข้อมูล</h1></header>
+    <div class="said-box" id="said-box"></div>
 
     <div class="card">
-      <h2>เราเก็บข้อมูลอะไร และเก็บไว้ที่ไหน</h2>
-      <p>ข้อมูลที่คุณกรอกถูกเก็บไว้ใน <b>เครื่องของคุณเอง</b> (browser storage) เท่านั้น ไม่ถูกส่งออกไปยังเซิร์ฟเวอร์ใด ๆ ในเวอร์ชันต้นแบบนี้</p>
-      <p>คุณสามารถดูและลบข้อมูลทั้งหมดได้ตลอดเวลาจากเมนู “ข้อมูลของฉัน”</p>
-    </div>
-
-    <div class="card">
-      <h2>เลือกความยินยอมแยกตามวัตถุประสงค์</h2>
-      <p class="hint">แต่ละข้อแยกจากกัน คุณเลือกให้เฉพาะข้อที่ยอมรับได้</p>
-
-      <label class="consent-item required">
-        <input type="checkbox" id="consent-core" data-consent="core">
-        <div>
-          <b>จำเป็น — ประเมินความเสี่ยงพื้นฐาน</b>
-          <span>อายุ อาชีพ รายได้โดยประมาณ ภาระหนี้ ผู้ที่ต้องดูแล เงินสำรอง ที่อยู่อาศัย การเดินทาง</span>
-        </div>
-      </label>
-
-      <label class="consent-item">
-        <input type="checkbox" id="consent-sensitive" data-consent="sensitive">
-        <div>
-          <b>ไม่บังคับ — ข้อมูลสุขภาพ <span class="tag tag-sensitive">ข้อมูลอ่อนไหว</span></b>
-          <span>โรคประจำตัว ประวัติครอบครัว พฤติกรรมสุขภาพ · หากไม่ยินยอม ระบบจะข้ามการประเมินด้านสุขภาพและแจ้งให้ทราบอย่างชัดเจน</span>
-        </div>
-      </label>
-
-      <label class="consent-item">
-        <input type="checkbox" id="consent-review" data-consent="review">
-        <div>
-          <b>ไม่บังคับ — ส่งให้ผู้เชี่ยวชาญตรวจสอบ</b>
-          <span>สร้างสรุปผลเพื่อส่งต่อให้ผู้เชี่ยวชาญที่ได้รับใบอนุญาตตรวจทาน (คุณกดยืนยันอีกครั้งก่อนส่งทุกครั้ง)</span>
-        </div>
-      </label>
-    </div>
-
-    <div class="card card-info">
-      <h2>สิทธิของคุณ</h2>
-      <p>ขอเข้าถึง · ขอแก้ไข · ขอลบ · ถอนความยินยอม — ทำได้ทุกเมื่อจากเมนู “ข้อมูลของฉัน” การถอนความยินยอมไม่กระทบการประมวลผลที่เกิดขึ้นก่อนหน้า</p>
-    </div>
-
-    <button class="btn btn-primary" id="btn-consent-next" disabled>ยินยอมและไปต่อ</button>
-  </section>
-
-  <!-- ══════════ 4. QUESTIONNAIRE ══════════ -->
-  <section class="screen" id="screen-quiz">
-    <header class="topbar">
-      <button class="back" id="quiz-back">←</button>
-      <div class="progress-wrap"><div class="progress"><div class="progress-bar" id="progress-bar"></div></div><span id="progress-label"></span></div>
-    </header>
-    <div id="quiz-body"></div>
-    <div class="quiz-nav">
-      <button class="btn btn-ghost" id="quiz-skip">ข้ามข้อนี้</button>
-      <button class="btn btn-primary" id="quiz-next" disabled>ถัดไป</button>
-    </div>
-  </section>
-
-  <!-- ══════════ 5. ANALYZING ══════════ -->
-  <section class="screen" id="screen-analyzing">
-    <div class="analyzing">
-      <div class="pulse"><img src="icons/logo.png" alt=""></div>
-      <h2>กำลังประเมินความเสี่ยง</h2>
-      <ul class="steps" id="analyze-steps">
-        <li data-step="0">ตรวจสอบความยินยอม</li>
-        <li data-step="1">จัดกลุ่มปัจจัยความเสี่ยง</li>
-        <li data-step="2">คำนวณระดับความเสี่ยง 5 ด้าน</li>
-        <li data-step="3">เทียบกับความคุ้มครองที่มีอยู่</li>
-        <li data-step="4">สร้างคำอธิบายเหตุผล</li>
-      </ul>
-    </div>
-  </section>
-
-  <!-- ══════════ 6. RISK PROFILE ══════════ -->
-  <section class="screen" id="screen-profile">
-    <header class="topbar"><button class="back" data-go="welcome">←</button><h1>Risk Profile ของคุณ</h1></header>
-
-    <div class="card card-banner">
-      <div class="banner-score"><span id="overall-score">–</span><small>/100</small></div>
-      <div>
-        <b id="overall-label">–</b>
-        <span id="overall-desc"></span>
+      <h2>🤖 สิ่งที่ระบบเข้าใจ</h2>
+      <p class="hint">แก้ได้ทุกช่อง — ระบบจะไม่เดาแทนคุณโดยไม่บอก</p>
+      <div class="edit-grid">
+        <label>👥 จำนวนคน
+          <select id="f-people"></select>
+        </label>
+        <label>📅 จำนวนวัน
+          <select id="f-days"></select>
+        </label>
+        <label>📍 ปลายทาง
+          <select id="f-place"></select>
+        </label>
+        <label>🚗 เดินทางด้วย
+          <select id="f-transport"></select>
+        </label>
+        <label style="grid-column:1/-1">🎯 กิจกรรมหลัก
+          <select id="f-activity"></select>
+        </label>
       </div>
+      <div id="understood-notes"></div>
     </div>
 
-    <div id="skipped-notice"></div>
-
-    <h2 class="section-title">ความเสี่ยงรายด้าน</h2>
-    <p class="section-hint">กดที่แต่ละด้านเพื่อดูเหตุผลว่าทำไมระบบประเมินแบบนี้</p>
-    <div id="domain-list"></div>
-
-    <h2 class="section-title">ช่องว่างความคุ้มครอง</h2>
-    <p class="section-hint">เรียงตามลำดับความสำคัญ พร้อมเหตุผลประกอบทุกข้อ</p>
-    <div id="gap-list"></div>
-
-    <h2 class="section-title">สิ่งที่ทำได้ตั้งแต่วันนี้</h2>
-    <p class="section-hint">ลดความเสี่ยงก่อนเกิดเหตุ — ไม่ต้องซื้ออะไรเพิ่ม</p>
-    <div id="prevention-list"></div>
-
-    <div class="card card-warn">
-      <h2>ข้อจำกัดของผลการประเมินนี้</h2>
-      <ul class="limits" id="limits-list"></ul>
-    </div>
-
-    <button class="btn btn-primary" data-go="review">ส่งให้ผู้เชี่ยวชาญตรวจสอบ</button>
-    <button class="btn btn-ghost" data-go="mydata">ข้อมูลของฉัน</button>
-    <button class="btn btn-ghost" data-action="restart">ประเมินใหม่</button>
-  </section>
-
-  <!-- ══════════ 7. HUMAN REVIEW ══════════ -->
-  <section class="screen" id="screen-review">
-    <header class="topbar"><button class="back" data-go="profile">←</button><h1>ส่งให้ผู้เชี่ยวชาญตรวจสอบ</h1></header>
-
-    <div class="card card-info">
-      <h2>ทำไมต้องมีคนตรวจสอบ</h2>
-      <p>ผลจากระบบเป็นเพียงการประเมินเบื้องต้นจากข้อมูลที่คุณให้ ผู้เชี่ยวชาญที่ได้รับใบอนุญาตจะตรวจทานก่อนให้คำแนะนำที่มีผลต่อการตัดสินใจจริง</p>
-      <div class="flow">
-        <div class="flow-step done">ระบบวิเคราะห์เบื้องต้น</div>
-        <div class="flow-arrow">↓</div>
-        <div class="flow-step done">แสดงเหตุผลและข้อจำกัด</div>
-        <div class="flow-arrow">↓</div>
-        <div class="flow-step current">ผู้เชี่ยวชาญตรวจสอบ</div>
-        <div class="flow-arrow">↓</div>
-        <div class="flow-step">คุณได้รับคำแนะนำ</div>
-      </div>
-    </div>
+    <div id="missing-notice"></div>
 
     <div class="card">
-      <h2>สรุปที่จะถูกส่ง</h2>
-      <p class="hint">ตรวจดูก่อนว่าคุณยอมรับให้ส่งข้อมูลชุดนี้หรือไม่</p>
-      <pre class="summary" id="review-summary"></pre>
+      <h2>⚠️ ความเสี่ยงของทริปนี้</h2>
+      <div id="risk-list"></div>
     </div>
+
+    <button class="btn btn-primary" id="btn-match">🔎 ค้นหาความคุ้มครองที่เหมาะ</button>
+  </section>
+
+  <!-- ══════════ 3. MATCHING — แผนจากพันธมิตร ══════════ -->
+  <section class="screen" id="screen-plans">
+    <header class="topbar"><button class="back" data-go="analysis">←</button><h1>แผนที่เหมาะกับทริปนี้</h1></header>
+
+    <div class="trip-chip" id="trip-chip"></div>
+
+    <div class="notice"><b>ข้อมูลสมมติเพื่อสาธิต</b> — บริษัทพันธมิตรและเบี้ยทั้งหมดเป็นตัวเลขตัวอย่าง ไม่ใช่ข้อเสนอจริงของบริษัทใด</div>
+
+    <div id="plan-list"></div>
+
+    <p class="section-hint">ระบบเรียงตามความเหมาะสมกับทริป ไม่ใช่ตามค่าตอบแทน · แผนที่ไม่เหมาะจะถูกกรองออกพร้อมเหตุผล</p>
+  </section>
+
+  <!-- ══════════ 4. CHECKOUT — ซื้อ (จำลอง) ══════════ -->
+  <section class="screen" id="screen-checkout">
+    <header class="topbar"><button class="back" data-go="plans">←</button><h1>ยืนยันความคุ้มครอง</h1></header>
+
+    <div id="checkout-body"></div>
 
     <label class="consent-item">
-      <input type="checkbox" id="review-confirm">
-      <div><b>ฉันยืนยันให้ส่งสรุปข้างต้นให้ผู้เชี่ยวชาญตรวจสอบ</b><span>คุณถอนได้ภายหลังจากเมนู “ข้อมูลของฉัน”</span></div>
+      <input type="checkbox" id="checkout-consent">
+      <div><b>ฉันเข้าใจว่านี่คือการสาธิต</b><span>ไม่มีการชำระเงินจริง ไม่มีกรมธรรม์จริง และไม่มีข้อมูลถูกส่งไปยังบริษัทใด</span></div>
     </label>
 
-    <button class="btn btn-primary" id="btn-send-review" disabled>ยืนยันการส่ง</button>
-    <div id="review-result"></div>
+    <button class="btn btn-primary" id="btn-buy" disabled>ยืนยัน (จำลองการซื้อ)</button>
   </section>
 
-  <!-- ══════════ 8. MY DATA ══════════ -->
-  <section class="screen" id="screen-mydata">
-    <header class="topbar"><button class="back" data-go="welcome">←</button><h1>ข้อมูลของฉัน</h1></header>
+  <!-- ══════════ 5. POLICY — กรมธรรม์ดิจิทัล (ตัวอย่าง) ══════════ -->
+  <section class="screen" id="screen-policy">
+    <header class="topbar"><button class="back" data-go="home">←</button><h1>ความคุ้มครองของคุณ</h1></header>
+    <div id="policy-body"></div>
+    <button class="btn btn-primary" data-go="home">เริ่มทริปใหม่</button>
+  </section>
 
-    <div class="card">
-      <h2>ความยินยอมที่ให้ไว้</h2>
-      <div id="consent-status"></div>
+  <!-- ══════════ 6. B2B — สำหรับบริษัทประกัน ══════════ -->
+  <section class="screen" id="screen-b2b">
+    <header class="topbar"><button class="back" data-go="home">←</button><h1>สำหรับบริษัทประกันภัย</h1></header>
+
+    <div class="hero hero-simple">
+      <h1 class="hero-title" style="font-size:22px">เราไม่ใช่บริษัทประกัน<br>เราคือแพลตฟอร์มของคุณ</h1>
+      <p class="hero-sub">ลูกค้าไม่รู้ว่าตัวเองควรซื้ออะไร — เราแปลงคำพูดธรรมดาของลูกค้าให้กลายเป็นความต้องการที่ชัดเจน แล้วจับคู่กับผลิตภัณฑ์ที่คุณมีอยู่แล้ว</p>
     </div>
 
     <div class="card">
-      <h2>ข้อมูลที่ระบบเก็บ</h2>
-      <pre class="summary" id="data-dump"></pre>
+      <h2>ลูกค้าเดินทางมาหาคุณอย่างไร</h2>
+      <div class="flow">
+        <div class="flow-step">👤 ลูกค้าเล่าทริปด้วยภาษาธรรมดา</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step">🤖 AI วิเคราะห์คน วัน ปลายทาง ความเสี่ยง</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step">🔎 จับคู่กับผลิตภัณฑ์ของพันธมิตร</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step">💰 แสดงราคาจริงจาก API ของคุณ</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step current">📄 คุณออกกรมธรรม์ ได้ลูกค้าใหม่</div>
+      </div>
     </div>
 
     <div class="card">
-      <h2>ประวัติการทำงานของระบบ</h2>
-      <p class="hint">บันทึกว่าระบบทำอะไร เมื่อไหร่ — เพื่อให้ตรวจสอบย้อนหลังได้</p>
-      <div id="audit-log"></div>
+      <h2>สิ่งที่พันธมิตรได้รับ</h2>
+      <div class="reason"><span class="dot">▸</span><span><b>ลูกค้าที่พร้อมซื้อ</b> — มาถึงพร้อมความต้องการชัดเจน ไม่ใช่คนที่เข้ามาดูเฉย ๆ</span></div>
+      <div class="reason"><span class="dot">▸</span><span><b>ขายเป็นทริป ไม่ใช่รายปี</b> — เข้าถึงกลุ่มที่ไม่เคยซื้อประกันรายปีเลย</span></div>
+      <div class="reason"><span class="dot">▸</span><span><b>เชื่อมผ่าน API</b> — ผลิตภัณฑ์และราคามาจากระบบของคุณโดยตรง เราไม่แตะการรับประกัน</span></div>
+      <div class="reason"><span class="dot">▸</span><span><b>การจับคู่โปร่งใส</b> — ทุกคำแนะนำมีเหตุผลกำกับ ตรวจสอบย้อนหลังได้</span></div>
     </div>
 
-    <button class="btn btn-ghost" data-action="export">ดาวน์โหลดข้อมูลของฉัน</button>
-    <button class="btn btn-danger" data-action="delete-all">ลบข้อมูลทั้งหมด</button>
+    <div class="card card-info">
+      <h2>โมเดลธุรกิจ</h2>
+      <p>ค่าธรรมเนียมต่อกรมธรรม์ที่เกิดขึ้นจริงผ่านแพลตฟอร์ม หรือให้เช่าระบบ (License) ไปฝังในช่องทางของบริษัทเอง — บริษัทเป็นผู้รับประกันและออกกรมธรรม์เสมอ เราเป็นเทคโนโลยีเท่านั้น</p>
+    </div>
   </section>
 
 </div>
 
-<!-- ══════════ BOTTOM NAVIGATION ══════════ -->
-<nav class="tabbar" id="tabbar">
-  <button data-tab="welcome" class="tab active"><span class="tab-ico">🏠</span>หน้าแรก</button>
-  <button data-tab="consent" class="tab"><span class="tab-ico">📝</span>ประเมิน</button>
-  <button data-tab="profile" class="tab"><span class="tab-ico">📊</span>ผลลัพธ์</button>
-  <button data-tab="mydata"  class="tab"><span class="tab-ico">🔒</span>ข้อมูลของฉัน</button>
-</nav>
-
 <div id="toast" class="toast"></div>
 
-<script src="js/questions.js"></script>
-<script src="js/config.js"></script>
-<script src="js/content.js"></script>
-<script src="js/engine.js"></script>
+<script src="js/trip.js"></script>
 <script src="js/store.js"></script>
 <script src="js/app.js"></script>
 </body>

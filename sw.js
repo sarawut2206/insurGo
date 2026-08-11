@@ -7,16 +7,14 @@
  * network-first ได้ของใหม่เสมอเมื่อออนไลน์ และยังเปิดได้ตามปกติเมื่อออฟไลน์
  */
 
-const CACHE = 'pkkk-v2';
+const CACHE = 'pkkk-v3';
 
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './css/styles.css',
-  './js/questions.js',
-  './js/config.js',
-  './js/engine.js',
+  './js/trip.js',
   './js/store.js',
   './js/app.js',
   './icons/logo.png'
