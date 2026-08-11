@@ -62,16 +62,24 @@
         <label>📅 จำนวนวัน
           <select id="f-days"></select>
         </label>
-        <label>📍 ปลายทาง
-          <select id="f-place"></select>
+        <label style="grid-column:1/-1">📍 ปลายทาง <small class="lbl-hint">พิมพ์เองได้ หรือเลือกจากรายการ</small>
+          <input id="f-place" list="place-options" autocomplete="off" placeholder="เช่น ชลบุรี, เชียงใหม่, ญี่ปุ่น">
+          <datalist id="place-options"></datalist>
         </label>
         <label>🚗 เดินทางด้วย
           <select id="f-transport"></select>
         </label>
-        <label style="grid-column:1/-1">🎯 กิจกรรมหลัก
+        <label>🎯 กิจกรรมหลัก
           <select id="f-activity"></select>
         </label>
       </div>
+
+      <label class="abroad-toggle">
+        <input type="checkbox" id="f-abroad">
+        <span><b>ปลายทางอยู่ต่างประเทศ</b> — ระบบจะเลือกแผนที่คุ้มครองค่ารักษาพยาบาลนอกประเทศให้</span>
+      </label>
+
+      <div id="place-note"></div>
       <div id="understood-notes"></div>
     </div>
 
@@ -94,8 +102,33 @@
     <div class="notice"><b>ข้อมูลสมมติเพื่อสาธิต</b> — บริษัทพันธมิตรและเบี้ยทั้งหมดเป็นตัวเลขตัวอย่าง ไม่ใช่ข้อเสนอจริงของบริษัทใด</div>
 
     <div id="plan-list"></div>
+    <div id="excluded-list"></div>
 
-    <p class="section-hint">ระบบเรียงตามความเหมาะสมกับทริป ไม่ใช่ตามค่าตอบแทน · แผนที่ไม่เหมาะจะถูกกรองออกพร้อมเหตุผล</p>
+    <p class="section-hint">ระบบเรียงตามความเหมาะสมกับทริป ไม่ใช่ตามค่าตอบแทน</p>
+    <button class="btn btn-ghost" data-go="insurers">ดูบริษัทประกันภัยจริงในประเทศไทย</button>
+  </section>
+
+  <!-- ══════════ 6. บริษัทประกันภัยจริง ══════════ -->
+  <section class="screen" id="screen-insurers">
+    <header class="topbar"><button class="back" data-go="plans">←</button><h1>บริษัทประกันภัยในไทย</h1></header>
+
+    <div class="notice"><b>หน้านี้คือข้อมูลจริง</b> — ลิงก์ไปเว็บไซต์ทางการของแต่ละบริษัท ไม่มีเบี้ยหรือทุนประกันจากเรา และบริษัทเหล่านี้<b>ยังไม่ได้เป็นพันธมิตร</b>ของแพลตฟอร์ม เป็นรายชื่อเป้าหมายที่ต้องการเชื่อมต่อในอนาคต</div>
+
+    <h2 class="section-title">ตรวจสอบก่อนซื้อประกันทุกครั้ง</h2>
+    <div id="ins-official"></div>
+
+    <h2 class="section-title">บริษัทประกันวินาศภัย</h2>
+    <p class="section-hint">ดูรายชื่อครบถ้วนได้ที่เว็บไซต์สมาคมประกันวินาศภัยไทย</p>
+    <div id="ins-companies"></div>
+
+    <h2 class="section-title">แพลตฟอร์มเปรียบเทียบและซื้อออนไลน์</h2>
+    <div id="ins-platforms"></div>
+
+    <div class="card card-info">
+      <h2>ทำไมเราถึงแยกหน้านี้ออกจากผลการจับคู่</h2>
+      <p>แผนที่ระบบจับคู่ให้ในหน้าก่อนหน้าใช้ <b>บริษัทสมมติ ก–จ</b> เพื่อสาธิตกลไก เราไม่นำชื่อบริษัทจริงมาผูกกับเบี้ยและทุนประกันที่เราสมมติขึ้น เพราะจะทำให้ผู้ใช้เข้าใจผิดว่าเป็นข้อเสนอจริง</p>
+      <p>เมื่อระบบเชื่อม API กับบริษัทจริงแล้ว ราคาและความคุ้มครองทุกตัวจะมาจากบริษัทโดยตรง และบริษัทเป็นผู้ออกกรมธรรม์เสมอ</p>
+    </div>
   </section>
 
   <!-- ══════════ 4. CHECKOUT — ซื้อ (จำลอง) ══════════ -->

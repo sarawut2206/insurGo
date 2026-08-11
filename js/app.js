@@ -78,10 +78,12 @@
     $('#f-days').innerHTML = Array.from({ length: 30 }, (_, i) =>
       opt(i + 1, (i + 1) + ' วัน', trip.days === i + 1)).join('');
 
-    // ปลายทาง
-    $('#f-place').innerHTML =
-      opt('', trip.place ? '' : '— ยังไม่ระบุ —', !trip.place) +
-      Trip.PLACES.map(p => opt(p.k, p.k + (p.abroad ? ' (ต่างประเทศ)' : ''), trip.placeText === p.k)).join('');
+    // ปลายทาง — พิมพ์เองได้ พร้อมรายการให้เลือก
+    $('#place-options').innerHTML = Trip.PLACES.map(p =>
+      '<option value="' + esc(p.k) + '">' + (p.abroad ? 'ต่างประเทศ' : '') + '</option>').join('');
+    $('#f-place').value = trip.placeText;
+    $('#f-abroad').checked = !!trip.abroad;
+    updatePlaceNote();
 
     // การเดินทาง
     $('#f-transport').innerHTML =
@@ -107,14 +109,32 @@
     renderRisks();
   }
 
+  /* ผู้ใช้พิมพ์ปลายทางเองได้ — ถ้าระบบรู้จักจะติ๊กต่างประเทศให้อัตโนมัติ
+     ถ้าไม่รู้จักก็ยังใช้งานต่อได้ แต่ต้องบอกผู้ใช้ตรง ๆ ว่าไม่รู้จัก */
+  function updatePlaceNote() {
+    const text = $('#f-place').value.trim();
+    const box = $('#place-note');
+    if (!text) { box.innerHTML = ''; return; }
+
+    const known = Trip.lookupPlace(text);
+    if (known) {
+      box.innerHTML = '<div class="place-ok">✓ รู้จัก <b>' + esc(known.k) + '</b> — ' + esc(known.note) + '</div>';
+    } else {
+      box.innerHTML = '<div class="place-unknown">ยังไม่รู้จัก <b>' + esc(text) +
+        '</b> — ระบบจะประเมินแบบทั่วไป หากเป็นต่างประเทศกรุณาติ๊กช่องด้านล่างเพื่อให้แนะนำแผนได้ถูกต้อง</div>';
+    }
+  }
+
   function currentTrip() {
-    const placeText = $('#f-place').value;
+    const placeText = $('#f-place').value.trim();
+    const known = Trip.lookupPlace(placeText);
     return {
       raw: trip.raw,
       people: parseInt($('#f-people').value, 10),
       days: parseInt($('#f-days').value, 10),
       placeText: placeText,
-      place: Trip.PLACES.find(p => p.k === placeText) || null,
+      place: known,
+      abroad: $('#f-abroad').checked,
       transport: $('#f-transport').value,
       activity: $('#f-activity').value
     };
@@ -131,8 +151,16 @@
   }
 
   function initAnalysis() {
-    ['f-people', 'f-days', 'f-place', 'f-transport', 'f-activity'].forEach(id =>
+    ['f-people', 'f-days', 'f-transport', 'f-activity', 'f-abroad'].forEach(id =>
       $('#' + id).addEventListener('change', renderRisks));
+
+    // ปลายทางเป็นช่องพิมพ์ — ต้องอัปเดตทั้งตอนพิมพ์และตอนเลือกจากรายการ
+    $('#f-place').addEventListener('input', () => {
+      const known = Trip.lookupPlace($('#f-place').value.trim());
+      if (known) $('#f-abroad').checked = known.abroad;   // เลือกที่รู้จัก → ตั้งค่าให้อัตโนมัติ
+      updatePlaceNote();
+      renderRisks();
+    });
 
     $('#btn-match').addEventListener('click', () => {
       trip = Object.assign({}, trip, currentTrip());
@@ -149,41 +177,69 @@
       (t.placeText ? ' · 📍 ' + esc(t.placeText) : '') +
       (t.transport ? ' · ' + esc((Trip.TRANSPORT.find(x => x.key === t.transport) || {}).label || '') : '');
 
-    const matches = Trip.match(t);
-    Store.log('จับคู่แผน: พบ ' + matches.length + ' แผนที่เหมาะ');
+    const result = Trip.match(t);
+    const matches = result.matched;
+    Store.log('จับคู่แผน: เหมาะ ' + matches.length + ' แผน, กรองออก ' + result.excluded.length + ' แผน');
 
     if (!matches.length) {
       $('#plan-list').innerHTML = '<div class="card"><p>ยังไม่พบแผนที่เหมาะกับทริปนี้ในระบบสาธิต ลองปรับปลายทางหรือวิธีเดินทางดูครับ</p></div>';
-      return;
+    } else {
+      $('#plan-list').innerHTML = matches.map((m, i) =>
+        '<div class="plan-card' + (i === 0 ? ' best' : '') + '">' +
+          (i === 0 ? '<span class="best-badge">เหมาะที่สุดกับทริปนี้</span>' : '') +
+          '<div class="plan-head">' +
+            '<span class="partner-dot" style="background:' + m.partner.tone + '"></span>' +
+            '<div class="plan-name"><b>' + esc(m.plan.name) + '</b>' +
+              '<small>' + esc(m.partner.name) + ' · <span class="type-tag">' + esc(m.plan.type) + '</span></small></div>' +
+            '<div class="plan-price"><b>' + m.total.toLocaleString('th-TH') + '</b><small>บาท*</small></div>' +
+          '</div>' +
+          '<div class="plan-breakdown">' + esc(m.breakdown) + '</div>' +
+
+          // ทุนประกัน — แสดงตรงหน้าการ์ดเลย ไม่ต้องกดเข้าไปดู
+          '<div class="reason-title">ความคุ้มครอง (ทุนประกัน)</div>' +
+          '<table class="sum-table">' + m.plan.sums.map(s =>
+            '<tr><td>' + esc(s.item) + '</td><td><b>' + esc(s.amount) + '</b></td></tr>').join('') +
+          '</table>' +
+
+          '<div class="reason-title">ทำไมถึงเหมาะ</div>' +
+          m.reasons.map(r => '<div class="reason"><span class="dot">✓</span><span>' + esc(r) + '</span></div>').join('') +
+          (m.warn ? '<div class="plan-warn">⚠️ ' + esc(m.warn) + '</div>' : '') +
+
+          '<details class="plan-detail"><summary>ดูข้อยกเว้น</summary>' +
+            m.plan.excludes.map(c => '<div class="reason"><span class="dot">✕</span><span>' + esc(c) + '</span></div>').join('') +
+          '</details>' +
+          '<button class="btn btn-primary btn-choose" data-plan="' + m.plan.id + '">เลือกแผนนี้</button>' +
+        '</div>'
+      ).join('') + '<p class="section-hint">* เบี้ยและทุนประกันเป็นตัวเลขตัวอย่างจากบริษัทสมมติ เพื่อสาธิตกลไกเท่านั้น</p>';
     }
 
-    $('#plan-list').innerHTML = matches.map((m, i) => {
-      return '<div class="plan-card' + (i === 0 ? ' best' : '') + '">' +
-        (i === 0 ? '<span class="best-badge">เหมาะที่สุดกับทริปนี้</span>' : '') +
-        '<div class="plan-head">' +
-          '<span class="partner-dot" style="background:' + m.partner.tone + '"></span>' +
-          '<div class="plan-name"><b>' + esc(m.plan.name) + '</b><small>' + esc(m.partner.name) + ' · ข้อมูลสมมติ</small></div>' +
-          '<div class="plan-price"><b>' + m.total.toLocaleString('th-TH') + '</b><small>บาท*</small></div>' +
-        '</div>' +
-        '<div class="plan-breakdown">' + esc(m.breakdown) + '</div>' +
-        '<div class="reason-title">ทำไมถึงเหมาะ</div>' +
-        m.reasons.map(r => '<div class="reason"><span class="dot">✓</span><span>' + esc(r) + '</span></div>').join('') +
-        (m.warn ? '<div class="plan-warn">⚠️ ' + esc(m.warn) + '</div>' : '') +
-        '<details class="plan-detail"><summary>ดูความคุ้มครองและข้อยกเว้น</summary>' +
-          '<div class="reason-title">คุ้มครอง</div>' +
-          m.plan.covers.map(c => '<div class="reason"><span class="dot">✓</span><span>' + esc(c) + '</span></div>').join('') +
-          '<div class="reason-title">ไม่คุ้มครอง</div>' +
-          m.plan.excludes.map(c => '<div class="reason"><span class="dot">✕</span><span>' + esc(c) + '</span></div>').join('') +
-        '</details>' +
-        '<button class="btn btn-primary btn-choose" data-plan="' + m.plan.id + '">เลือกแผนนี้</button>' +
-      '</div>';
-    }).join('') + '<p class="section-hint">* ตัวเลขตัวอย่างเพื่อสาธิตกลไกการคำนวณเท่านั้น</p>';
+    // แสดงแผนที่ถูกกรองออกพร้อมเหตุผล — ความโปร่งใสที่บริษัทประกันตรวจสอบได้
+    $('#excluded-list').innerHTML = result.excluded.length
+      ? '<details class="excluded"><summary>ระบบกรอง ' + result.excluded.length + ' แผนออก — ดูเหตุผล</summary>' +
+        result.excluded.map(e =>
+          '<div class="reason"><span class="dot">✕</span><span><b>' + esc(e.name) + '</b><br><small class="hint">' + esc(e.why) + '</small></span></div>'
+        ).join('') + '</details>'
+      : '';
 
     $$('.btn-choose').forEach(b => b.addEventListener('click', () => {
       chosen = matches.find(m => m.plan.id === b.dataset.plan);
       renderCheckout();
       go('checkout');
     }));
+  }
+
+  /* ───────── บริษัทประกันภัยจริง ───────── */
+  function renderInsurers() {
+    const row = (x, showNote) =>
+      '<a class="ins-row" href="' + esc(x.url) + '" target="_blank" rel="noopener noreferrer">' +
+        '<div><b>' + esc(x.name) + '</b>' +
+        (showNote && x.note ? '<small>' + esc(x.note) + '</small>' : '') + '</div>' +
+        '<span class="ins-go">เปิดเว็บไซต์ ↗</span>' +
+      '</a>';
+
+    $('#ins-official').innerHTML  = REAL_INSURERS.official.map(x => row(x, true)).join('');
+    $('#ins-companies').innerHTML = REAL_INSURERS.companies.map(x => row(x, false)).join('');
+    $('#ins-platforms').innerHTML = REAL_INSURERS.platforms.map(x => row(x, true)).join('');
   }
 
   /* ───────── 4. ยืนยัน (จำลอง) ───────── */
@@ -199,7 +255,16 @@
         '<div class="banner-score" style="font-size:26px">' + chosen.total.toLocaleString('th-TH') + '<small> บาท*</small></div>' +
       '</div>' +
       '<div class="card"><h2>สรุปการคำนวณ</h2><p>' + esc(chosen.breakdown) + '</p>' +
-      '<p class="hint">* ตัวเลขตัวอย่าง — ระบบจริงราคาจะมาจาก API ของบริษัทประกันโดยตรง และบริษัทเป็นผู้ออกกรมธรรม์</p></div>';
+      '<p class="hint">* ตัวเลขตัวอย่าง — ระบบจริงราคาจะมาจาก API ของบริษัทประกันโดยตรง และบริษัทเป็นผู้ออกกรมธรรม์</p></div>' +
+
+      '<div class="card"><h2>ความคุ้มครองที่คุณจะได้รับ</h2>' +
+        '<table class="sum-table">' + chosen.plan.sums.map(s =>
+          '<tr><td>' + esc(s.item) + '</td><td><b>' + esc(s.amount) + '</b></td></tr>').join('') +
+        '</table></div>' +
+
+      '<div class="card card-warn"><h2>ข้อยกเว้นที่ต้องอ่านก่อน</h2>' +
+        chosen.plan.excludes.map(c => '<div class="reason"><span class="dot">✕</span><span>' + esc(c) + '</span></div>').join('') +
+      '</div>';
 
     $('#checkout-consent').checked = false;
     $('#btn-buy').disabled = true;
@@ -241,6 +306,10 @@
         (t.placeText ? '<div class="policy-row"><span>พื้นที่</span><b>' + esc(t.placeText) + '</b></div>' : '') +
         '<div class="policy-row"><span>เบี้ยรวม</span><b>' + chosen.total.toLocaleString('th-TH') + ' บาท*</b></div>' +
         '<div class="policy-row"><span>เลขอ้างอิง</span><b class="ref">' + ref + '</b></div>' +
+        '<div class="reason-title">ความคุ้มครอง (ทุนประกัน)</div>' +
+        '<table class="sum-table">' + chosen.plan.sums.map(s =>
+          '<tr><td>' + esc(s.item) + '</td><td><b>' + esc(s.amount) + '</b></td></tr>').join('') +
+        '</table>' +
       '</div>' +
       '<div class="card card-info"><h2>🚨 ผู้ช่วยเคลม</h2>' +
         '<p>ในระบบจริง หากเกิดเหตุระหว่างทริป กดปุ่มเดียวเพื่อแจ้งเหตุ แชร์ตำแหน่ง และส่งเอกสารถึงบริษัทผู้รับประกันโดยตรง</p></div>' +
@@ -252,6 +321,7 @@
     initHome();
     initAnalysis();
     initCheckout();
+    renderInsurers();
 
     $$('[data-go]').forEach(b => b.addEventListener('click', () => go(b.dataset.go)));
 
