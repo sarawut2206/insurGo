@@ -1,0 +1,19 @@
+{
+  "name": "ประกันไปกับคุณ",
+  "short_name": "ประกันไปกับคุณ",
+  "description": "เข้าใจความเสี่ยงของคุณ ก่อนตัดสินใจเรื่องประกัน",
+  "lang": "th",
+  "dir": "ltr",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F4F7FC",
+  "theme_color": "#0B3D91",
+  "categories": ["finance", "utilities"],
+  "icons": [
+    { "src": "icons/logo.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/logo.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/logo.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

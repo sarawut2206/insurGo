@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B3D91">
+<title>ประกันไปกับคุณ</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/logo.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="เข้าใจความเสี่ยงของคุณ ก่อนตัดสินใจเรื่องประกัน">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ══════════ 1. WELCOME ══════════ -->
+  <section class="screen active" id="screen-welcome">
+    <div class="hero">
+      <img src="icons/logo.png" alt="ประกันไปกับคุณ" class="hero-logo">
+      <h1 class="hero-title">ประกันไปกับคุณ</h1>
+      <p class="hero-tagline">เข้าใจความเสี่ยง · แนะนำสิ่งที่ใช่ · ดูแลไปด้วยกัน</p>
+    </div>
+
+    <div class="card">
+      <h2>ระบบนี้ทำอะไร</h2>
+      <ul class="feature-list">
+        <li><span class="ico">1</span><div><b>ประเมินความเสี่ยงของคุณ</b><span>ตอบคำถามสั้น ๆ ระบบสร้าง Risk Profile 5 ด้าน</span></div></li>
+        <li><span class="ico">2</span><div><b>หาช่องว่างความคุ้มครอง</b><span>บอกว่าคุณยังขาดความคุ้มครองด้านไหน พร้อมเหตุผล</span></div></li>
+        <li><span class="ico">3</span><div><b>แนะนำวิธีลดความเสี่ยง</b><span>สิ่งที่ทำได้ตั้งแต่วันนี้ ก่อนเกิดเหตุ</span></div></li>
+      </ul>
+    </div>
+
+    <div class="card card-warn">
+      <h2>สิ่งที่ระบบนี้ <u>ไม่ทำ</u></h2>
+      <p>ไม่อนุมัติหรือปฏิเสธการรับประกัน · ไม่กำหนดเบี้ยประกันจริง · ไม่ใช่คำแนะนำการลงทุนหรือการเงินเฉพาะบุคคล · ไม่แนะนำผลิตภัณฑ์ของบริษัทใดบริษัทหนึ่ง</p>
+      <p>ระบบแนะนำเป็น <b>ประเภทความคุ้มครอง</b> เท่านั้น การพิจารณารับประกันจริงเป็นหน้าที่ของบริษัทประกันภัยและผู้เชี่ยวชาญที่ได้รับใบอนุญาต</p>
+    </div>
+
+    <button class="btn btn-primary" data-go="consent">เริ่มต้น</button>
+    <button class="btn btn-ghost" data-action="load-demo">ดูตัวอย่างด้วยข้อมูลจำลอง</button>
+    <p class="foot-note">เวอร์ชันต้นแบบ · ข้อมูลทั้งหมดเก็บในเครื่องของคุณเท่านั้น</p>
+  </section>
+
+  <!-- ══════════ 2. CONSENT (PDPA) ══════════ -->
+  <section class="screen" id="screen-consent">
+    <header class="topbar"><button class="back" data-go="welcome">←</button><h1>ความยินยอมการใช้ข้อมูล</h1></header>
+
+    <div class="card">
+      <h2>เราเก็บข้อมูลอะไร และเก็บไว้ที่ไหน</h2>
+      <p>ข้อมูลที่คุณกรอกถูกเก็บไว้ใน <b>เครื่องของคุณเอง</b> (browser storage) เท่านั้น ไม่ถูกส่งออกไปยังเซิร์ฟเวอร์ใด ๆ ในเวอร์ชันต้นแบบนี้</p>
+      <p>คุณสามารถดูและลบข้อมูลทั้งหมดได้ตลอดเวลาจากเมนู “ข้อมูลของฉัน”</p>
+    </div>
+
+    <div class="card">
+      <h2>เลือกความยินยอมแยกตามวัตถุประสงค์</h2>
+      <p class="hint">แต่ละข้อแยกจากกัน คุณเลือกให้เฉพาะข้อที่ยอมรับได้</p>
+
+      <label class="consent-item required">
+        <input type="checkbox" id="consent-core" data-consent="core">
+        <div>
+          <b>จำเป็น — ประเมินความเสี่ยงพื้นฐาน</b>
+          <span>อายุ อาชีพ รายได้โดยประมาณ ภาระหนี้ ผู้ที่ต้องดูแล เงินสำรอง ที่อยู่อาศัย การเดินทาง</span>
+        </div>
+      </label>
+
+      <label class="consent-item">
+        <input type="checkbox" id="consent-sensitive" data-consent="sensitive">
+        <div>
+          <b>ไม่บังคับ — ข้อมูลสุขภาพ <span class="tag tag-sensitive">ข้อมูลอ่อนไหว</span></b>
+          <span>โรคประจำตัว ประวัติครอบครัว พฤติกรรมสุขภาพ · หากไม่ยินยอม ระบบจะข้ามการประเมินด้านสุขภาพและแจ้งให้ทราบอย่างชัดเจน</span>
+        </div>
+      </label>
+
+      <label class="consent-item">
+        <input type="checkbox" id="consent-review" data-consent="review">
+        <div>
+          <b>ไม่บังคับ — ส่งให้ผู้เชี่ยวชาญตรวจสอบ</b>
+          <span>สร้างสรุปผลเพื่อส่งต่อให้ผู้เชี่ยวชาญที่ได้รับใบอนุญาตตรวจทาน (คุณกดยืนยันอีกครั้งก่อนส่งทุกครั้ง)</span>
+        </div>
+      </label>
+    </div>
+
+    <div class="card card-info">
+      <h2>สิทธิของคุณ</h2>
+      <p>ขอเข้าถึง · ขอแก้ไข · ขอลบ · ถอนความยินยอม — ทำได้ทุกเมื่อจากเมนู “ข้อมูลของฉัน” การถอนความยินยอมไม่กระทบการประมวลผลที่เกิดขึ้นก่อนหน้า</p>
+    </div>
+
+    <button class="btn btn-primary" id="btn-consent-next" disabled>ยินยอมและไปต่อ</button>
+  </section>
+
+  <!-- ══════════ 3. QUESTIONNAIRE ══════════ -->
+  <section class="screen" id="screen-quiz">
+    <header class="topbar">
+      <button class="back" id="quiz-back">←</button>
+      <div class="progress-wrap"><div class="progress"><div class="progress-bar" id="progress-bar"></div></div><span id="progress-label"></span></div>
+    </header>
+    <div id="quiz-body"></div>
+    <div class="quiz-nav">
+      <button class="btn btn-ghost" id="quiz-skip">ข้ามข้อนี้</button>
+      <button class="btn btn-primary" id="quiz-next" disabled>ถัดไป</button>
+    </div>
+  </section>
+
+  <!-- ══════════ 4. ANALYZING ══════════ -->
+  <section class="screen" id="screen-analyzing">
+    <div class="analyzing">
+      <div class="pulse"><img src="icons/logo.png" alt=""></div>
+      <h2>กำลังประเมินความเสี่ยง</h2>
+      <ul class="steps" id="analyze-steps">
+        <li data-step="0">ตรวจสอบความยินยอม</li>
+        <li data-step="1">จัดกลุ่มปัจจัยความเสี่ยง</li>
+        <li data-step="2">คำนวณระดับความเสี่ยง 5 ด้าน</li>
+        <li data-step="3">เทียบกับความคุ้มครองที่มีอยู่</li>
+        <li data-step="4">สร้างคำอธิบายเหตุผล</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ══════════ 5. RISK PROFILE ══════════ -->
+  <section class="screen" id="screen-profile">
+    <header class="topbar"><button class="back" data-go="welcome">←</button><h1>Risk Profile ของคุณ</h1></header>
+
+    <div class="card card-banner">
+      <div class="banner-score"><span id="overall-score">–</span><small>/100</small></div>
+      <div>
+        <b id="overall-label">–</b>
+        <span id="overall-desc"></span>
+      </div>
+    </div>
+
+    <div id="skipped-notice"></div>
+
+    <h2 class="section-title">ความเสี่ยงรายด้าน</h2>
+    <p class="section-hint">กดที่แต่ละด้านเพื่อดูเหตุผลว่าทำไมระบบประเมินแบบนี้</p>
+    <div id="domain-list"></div>
+
+    <h2 class="section-title">ช่องว่างความคุ้มครอง</h2>
+    <p class="section-hint">เรียงตามลำดับความสำคัญ พร้อมเหตุผลประกอบทุกข้อ</p>
+    <div id="gap-list"></div>
+
+    <h2 class="section-title">สิ่งที่ทำได้ตั้งแต่วันนี้</h2>
+    <p class="section-hint">ลดความเสี่ยงก่อนเกิดเหตุ — ไม่ต้องซื้ออะไรเพิ่ม</p>
+    <div id="prevention-list"></div>
+
+    <div class="card card-warn">
+      <h2>ข้อจำกัดของผลการประเมินนี้</h2>
+      <ul class="limits" id="limits-list"></ul>
+    </div>
+
+    <button class="btn btn-primary" data-go="review">ส่งให้ผู้เชี่ยวชาญตรวจสอบ</button>
+    <button class="btn btn-ghost" data-go="mydata">ข้อมูลของฉัน</button>
+    <button class="btn btn-ghost" data-action="restart">ประเมินใหม่</button>
+  </section>
+
+  <!-- ══════════ 6. HUMAN REVIEW ══════════ -->
+  <section class="screen" id="screen-review">
+    <header class="topbar"><button class="back" data-go="profile">←</button><h1>ส่งให้ผู้เชี่ยวชาญตรวจสอบ</h1></header>
+
+    <div class="card card-info">
+      <h2>ทำไมต้องมีคนตรวจสอบ</h2>
+      <p>ผลจากระบบเป็นเพียงการประเมินเบื้องต้นจากข้อมูลที่คุณให้ ผู้เชี่ยวชาญที่ได้รับใบอนุญาตจะตรวจทานก่อนให้คำแนะนำที่มีผลต่อการตัดสินใจจริง</p>
+      <div class="flow">
+        <div class="flow-step done">ระบบวิเคราะห์เบื้องต้น</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step done">แสดงเหตุผลและข้อจำกัด</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step current">ผู้เชี่ยวชาญตรวจสอบ</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step">คุณได้รับคำแนะนำ</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>สรุปที่จะถูกส่ง</h2>
+      <p class="hint">ตรวจดูก่อนว่าคุณยอมรับให้ส่งข้อมูลชุดนี้หรือไม่</p>
+      <pre class="summary" id="review-summary"></pre>
+    </div>
+
+    <label class="consent-item">
+      <input type="checkbox" id="review-confirm">
+      <div><b>ฉันยืนยันให้ส่งสรุปข้างต้นให้ผู้เชี่ยวชาญตรวจสอบ</b><span>คุณถอนได้ภายหลังจากเมนู “ข้อมูลของฉัน”</span></div>
+    </label>
+
+    <button class="btn btn-primary" id="btn-send-review" disabled>ยืนยันการส่ง</button>
+    <div id="review-result"></div>
+  </section>
+
+  <!-- ══════════ 7. MY DATA ══════════ -->
+  <section class="screen" id="screen-mydata">
+    <header class="topbar"><button class="back" data-go="profile">←</button><h1>ข้อมูลของฉัน</h1></header>
+
+    <div class="card">
+      <h2>ความยินยอมที่ให้ไว้</h2>
+      <div id="consent-status"></div>
+    </div>
+
+    <div class="card">
+      <h2>ข้อมูลที่ระบบเก็บ</h2>
+      <pre class="summary" id="data-dump"></pre>
+    </div>
+
+    <div class="card">
+      <h2>ประวัติการทำงานของระบบ</h2>
+      <p class="hint">บันทึกว่าระบบทำอะไร เมื่อไหร่ — เพื่อให้ตรวจสอบย้อนหลังได้</p>
+      <div id="audit-log"></div>
+    </div>
+
+    <button class="btn btn-ghost" data-action="export">ดาวน์โหลดข้อมูลของฉัน</button>
+    <button class="btn btn-danger" data-action="delete-all">ลบข้อมูลทั้งหมด</button>
+  </section>
+
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="js/questions.js"></script>
+<script src="js/config.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/store.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
