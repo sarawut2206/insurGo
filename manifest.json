@@ -10,7 +10,7 @@
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
   "orientation": "portrait",
-  "background_color": "#F4F7FC",
+  "background_color": "#F5F7FB",
   "theme_color": "#0B3D91",
   "categories": ["finance", "travel", "utilities"],
   "prefer_related_applications": false,
@@ -20,19 +20,8 @@
     { "src": "icons/logo.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
   ],
   "shortcuts": [
-    {
-      "name": "เริ่มทริปใหม่",
-      "short_name": "ทริปใหม่",
-      "description": "เล่าทริปแล้วให้ระบบวิเคราะห์ความเสี่ยง",
-      "url": "./index.html#home",
-      "icons": [{ "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
-    },
-    {
-      "name": "สำหรับบริษัทประกันภัย",
-      "short_name": "B2B",
-      "description": "โมเดลธุรกิจสำหรับพันธมิตร",
-      "url": "./index.html#b2b",
-      "icons": [{ "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
-    }
+    { "name": "เริ่มทริปใหม่", "short_name": "ทริปใหม่", "url": "./index.html#home" },
+    { "name": "ความคุ้มครองของฉัน", "short_name": "ของฉัน", "url": "./index.html#account" },
+    { "name": "สำหรับบริษัทประกันภัย", "short_name": "B2B", "url": "./index.html#b2b" }
   ]
 }

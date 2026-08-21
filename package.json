@@ -1,0 +1,33 @@
+{
+  "name": "insurgo",
+  "version": "1.0.0",
+  "description": "ประกันไปกับคุณ — AI Insurance Companion",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node server.js 5173",
+    "build": "node scripts/build.js",
+    "app:init": "npm run build && npx cap init \"ประกันไปกับคุณ\" com.insurgo.app --web-dir=www",
+    "app:android": "npm run build && npx cap add android && npx cap sync android",
+    "app:ios": "npm run build && npx cap add ios && npx cap sync ios",
+    "app:sync": "npm run build && npx cap sync",
+    "app:open:android": "npx cap open android",
+    "app:open:ios": "npx cap open ios",
+    "app:run:android": "npm run build && npx cap run android"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.2.0"
+  },
+  "dependencies": {
+    "@capacitor/core": "^6.2.0",
+    "@capacitor/android": "^6.2.0",
+    "@capacitor/ios": "^6.2.0",
+    "@capacitor/app": "^6.0.2",
+    "@capacitor/haptics": "^6.0.2",
+    "@capacitor/status-bar": "^6.0.2",
+    "@capacitor/splash-screen": "^6.0.3",
+    "@capacitor/share": "^6.0.3",
+    "@capacitor/browser": "^6.0.4",
+    "@capacitor/network": "^6.0.3"
+  }
+}

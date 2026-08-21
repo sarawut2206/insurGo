@@ -2,11 +2,13 @@
 <html lang="th">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=yes">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#0B3D91" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#081327" media="(prefers-color-scheme: dark)">
 <title>ประกันไปกับคุณ</title>
+<meta name="description" content="บอกเราว่าคุณกำลังจะไปไหน เราจะช่วยดูว่าคุณกำลังเสี่ยงอะไร และค้นหาความคุ้มครองที่เหมาะกับทริปของคุณ">
+
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
 <link rel="apple-touch-icon" href="icons/logo.png">
@@ -14,260 +16,183 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="ประกันไปกับคุณ">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="description" content="บอกเราว่าคุณกำลังจะไปไหน เราจะช่วยดูว่าคุณกำลังเสี่ยงอะไร และค้นหาความคุ้มครองที่เหมาะกับทริปของคุณ">
-<link rel="stylesheet" href="css/styles.css">
+
+<link rel="stylesheet" href="css/app.css">
 </head>
 <body>
 
 <a href="#main" class="skip-link">ข้ามไปยังเนื้อหาหลัก</a>
+<div id="offline-bar" class="offline-bar" role="status" hidden>ออฟไลน์อยู่ — แอปยังใช้งานได้ตามปกติ</div>
+<div id="live-region" class="sr-only" role="status" aria-live="polite"></div>
 
-<!-- แถบแจ้งสถานะออฟไลน์ — ผู้ใช้ต้องรู้เสมอว่ากำลังใช้ข้อมูลที่แคชไว้ -->
-<div id="offline-bar" class="offline-bar" role="status" hidden>📴 ออฟไลน์อยู่ — แอปยังใช้งานได้ตามปกติ</div>
+<main id="main" class="app">
 
-<!-- ประกาศให้โปรแกรมอ่านหน้าจอทราบเมื่อเปลี่ยนหน้า -->
-<div id="live" class="sr-only" role="status" aria-live="polite"></div>
+  <!-- ═══════════ หน้าแรก ═══════════ -->
+  <section class="screen is-active" id="screen-home" aria-labelledby="title-home">
+    <header class="appbar">
+      <img src="icons/icon.svg" alt="" class="appbar-icon" width="36" height="36">
+      <span class="appbar-title">ประกันไปกับคุณ</span>
+      <button type="button" class="icon-btn" data-go="account" aria-label="ความคุ้มครองและข้อมูลของฉัน">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v6c0 4.2-2.9 7.7-7 9-4.1-1.3-7-4.8-7-9V6l7-3z"/></svg>
+      </button>
+    </header>
 
-<div id="app" role="main">
-
-  <!-- ══════════ 1. HOME — พิมพ์ทริป ══════════ -->
-  <section class="screen active" id="screen-home" aria-labelledby="h-home">
-    <div class="appbar">
-      <img src="icons/icon.svg" alt="" class="appbar-logo" width="34" height="34">
-      <div class="appbar-name">ประกันไปกับคุณ</div>
-      <button class="appbar-btn" id="btn-install" type="button" hidden aria-label="ติดตั้งแอป">⬇︎</button>
+    <div class="hero">
+      <p class="eyebrow">AI Insurance Companion</p>
+      <h1 class="hero-title" id="title-home" tabindex="-1" data-focus>คุณกำลังจะไปไหน?</h1>
+      <p class="hero-lead">เล่าทริปของคุณเหมือนเล่าให้เพื่อนฟัง แล้ว AI จะช่วยดูว่าคุณกำลังเสี่ยงอะไร และหาความคุ้มครองที่เหมาะกับทริปนี้</p>
     </div>
 
-    <div class="hero hero-simple" id="main">
-      <h1 class="hero-title" id="h-home" tabindex="-1">คุณกำลังจะไปไหน?</h1>
-      <p class="hero-sub">บอกเราเหมือนเล่าให้เพื่อนฟัง แล้ว AI จะช่วยดูว่าคุณกำลังเสี่ยงอะไร และหาความคุ้มครองที่เหมาะกับทริปนี้</p>
-    </div>
-
-    <div class="trip-box">
+    <div class="composer">
       <label for="trip-input" class="sr-only">เล่าทริปของคุณ</label>
       <textarea id="trip-input" rows="3" enterkeyhint="go" autocapitalize="sentences"
-        placeholder="เช่น ผมจะพาลูก 2 คนไปเที่ยวเขาใหญ่ 2 วัน"></textarea>
-      <button class="btn btn-primary" id="btn-analyze" type="button">🤖 วิเคราะห์ทริปของฉัน</button>
+        placeholder="เช่น พาลูก 2 คนไปเที่ยวเขาใหญ่ 2 วัน"></textarea>
+      <button type="button" class="btn btn-primary" id="btn-analyze">วิเคราะห์ทริปของฉัน</button>
+      <p class="composer-note">ข้อความถูกวิเคราะห์ในเครื่องของคุณ ไม่ถูกส่งออกไปที่ใด</p>
     </div>
 
-    <p class="section-hint" style="margin-top:14px">หรือลองตัวอย่างเหล่านี้</p>
-    <div id="example-list" class="example-list"></div>
+    <h2 class="section-label">ลองตัวอย่างเหล่านี้</h2>
+    <div class="chip-row" id="example-chips"></div>
 
-    <div class="mini-journey">
-      <span>เล่าทริป</span>→<span>AI วิเคราะห์</span>→<span>เห็นความเสี่ยง</span>→<span>เทียบแผน</span>→<span>คุ้มครอง</span>
-    </div>
+    <ol class="journey" aria-label="ขั้นตอนการใช้งาน">
+      <li>เล่าทริป</li><li>AI วิเคราะห์</li><li>เห็นความเสี่ยง</li><li>เทียบแผน</li><li>คุ้มครอง</li>
+    </ol>
 
-    <!-- ชวนติดตั้งเป็นแอป — แสดงเฉพาะตอนที่ยังไม่ได้ติดตั้ง -->
     <div class="install-card" id="install-card" hidden>
-      <img src="icons/icon.svg" alt="">
-      <div>
+      <img src="icons/icon.svg" alt="" width="46" height="46">
+      <div class="install-text">
         <b>ติดตั้งเป็นแอป</b>
         <span>เปิดเต็มจอ ใช้ได้แม้ไม่มีเน็ต</span>
       </div>
-      <button type="button" id="install-go">ติดตั้ง</button>
-      <button type="button" id="install-close" class="close-x" aria-label="ปิด">✕</button>
+      <button type="button" class="btn-mini" id="install-go">ติดตั้ง</button>
+      <button type="button" class="icon-btn ghost" id="install-close" aria-label="ปิดคำชวนติดตั้ง">✕</button>
     </div>
 
-    <footer class="foot">
-      <p class="foot-dim">ต้นแบบเพื่อนำเสนอแนวคิด · บริษัทพันธมิตรและเบี้ยประกันทั้งหมดเป็นข้อมูลสมมติ ไม่ใช่ข้อเสนอจริง</p>
-      <p class="foot-dim">ข้อความที่พิมพ์ถูกวิเคราะห์ในเครื่องของคุณ ไม่ถูกส่งออกไปที่ใด · <a href="#" id="link-b2b">สำหรับบริษัทประกันภัย</a> · <a href="#" id="link-clear">ลบข้อมูล</a></p>
+    <footer class="footer">
+      <p>ต้นแบบเพื่อนำเสนอแนวคิด · บริษัทพันธมิตรและเบี้ยประกันทั้งหมดเป็นข้อมูลสมมติ ไม่ใช่ข้อเสนอจริง</p>
+      <div class="chip-row" style="justify-content:center">
+        <button type="button" class="chip" data-go="b2b">สำหรับบริษัทประกันภัย</button>
+        <button type="button" class="chip" data-go="insurers">บริษัทประกันภัยจริงในไทย</button>
+      </div>
     </footer>
   </section>
 
-  <!-- ══════════ 2. ANALYSIS — AI เข้าใจว่าอะไร + แก้ได้ ══════════ -->
-  <!-- ══════════ AI กำลังวิเคราะห์ ══════════ -->
-  <section class="screen" id="screen-analyzing" aria-labelledby="h-analyzing">
+  <!-- ═══════════ กำลังวิเคราะห์ ═══════════ -->
+  <section class="screen" id="screen-analyzing" aria-labelledby="title-analyzing">
     <div class="analyzing">
-      <div class="pulse"><img src="icons/icon.svg" alt="" width="96" height="96"></div>
-      <h2 id="h-analyzing" tabindex="-1">กำลังวิเคราะห์ทริปของคุณ</h2>
-      <ul class="steps" id="analyze-steps">
+      <div class="analyzing-mark"><img src="icons/icon.svg" alt="" width="88" height="88"></div>
+      <h1 class="analyzing-title" id="title-analyzing" tabindex="-1" data-focus>กำลังวิเคราะห์ทริปของคุณ</h1>
+      <ol class="analyzing-steps" id="analyzing-steps">
         <li>อ่านสิ่งที่คุณเล่า</li>
         <li>แยกจำนวนคน วัน และปลายทาง</li>
         <li>ระบุกิจกรรมและความเสี่ยง</li>
         <li>เตรียมจับคู่ความคุ้มครอง</li>
-      </ul>
+      </ol>
     </div>
   </section>
 
-  <section class="screen" id="screen-analysis" aria-labelledby="h-analysis">
-    <header class="topbar"><button class="back" data-go="home" aria-label="ย้อนกลับ">←</button><h1 id="h-analysis" tabindex="-1">AI วิเคราะห์ทริปของคุณ</h1></header>
-
-    <div class="said-box" id="said-box"></div>
-
-    <div class="card">
-      <h2>🤖 สิ่งที่ระบบเข้าใจ</h2>
-      <p class="hint">แก้ได้ทุกช่อง — ระบบจะไม่เดาแทนคุณโดยไม่บอก</p>
-      <div class="edit-grid">
-        <label>👥 จำนวนคน
-          <select id="f-people"></select>
-        </label>
-        <label>📅 จำนวนวัน
-          <select id="f-days"></select>
-        </label>
-        <label style="grid-column:1/-1">📍 ปลายทาง <small class="lbl-hint">พิมพ์เองได้ หรือเลือกจากรายการ</small>
-          <input id="f-place" list="place-options" autocomplete="off" placeholder="เช่น ชลบุรี, เชียงใหม่, ญี่ปุ่น">
-          <datalist id="place-options"></datalist>
-        </label>
-        <label style="grid-column:1/-1">🚗 เดินทางด้วย
-          <select id="f-transport"></select>
-        </label>
-      </div>
-
-      <label class="abroad-toggle">
-        <input type="checkbox" id="f-abroad">
-        <span><b>ปลายทางอยู่ต่างประเทศ</b> — ระบบจะเลือกแผนที่คุ้มครองค่ารักษาพยาบาลนอกประเทศให้</span>
-      </label>
-
-      <div id="place-note"></div>
-      <div id="understood-notes"></div>
-    </div>
-
-    <div id="missing-notice"></div>
-
-    <div class="card">
-      <h2>🎯 กิจกรรมในทริปนี้ <span class="act-count" id="act-count"></span></h2>
-      <p class="hint">AI เลือกจากที่คุณเล่าให้แล้ว และเสนอกิจกรรมที่มักเกิดขึ้นในทริปแบบนี้เพิ่มเติม — <b>กดเลือกได้หลายอย่าง</b> ยิ่งเลือกครบ ระบบยิ่งจับคู่ความคุ้มครองได้แม่นขึ้น</p>
-
-      <div id="act-suggested"></div>
-
-      <div class="act-add">
-        <input id="act-input" placeholder="พิมพ์กิจกรรมอื่นที่ไม่มีในรายการ" autocomplete="off">
-        <button id="act-add-btn" type="button">เพิ่ม</button>
-      </div>
-      <div id="act-custom"></div>
-
-      <details class="act-all"><summary>ดูกิจกรรมทั้งหมดตามหมวด</summary><div id="act-catalog"></div></details>
-    </div>
-
-    <div class="card">
-      <h2>⚠️ ความเสี่ยงของทริปนี้</h2>
-      <div id="risk-list"></div>
-    </div>
-
-    <div class="sticky-cta">
-      <button class="btn btn-primary" id="btn-match" type="button">🔎 ค้นหาความคุ้มครองที่เหมาะ</button>
+  <!-- ═══════════ ผลการวิเคราะห์ ═══════════ -->
+  <section class="screen" id="screen-analysis" aria-labelledby="title-analysis">
+    <header class="appbar">
+      <button type="button" class="icon-btn" data-go="back" aria-label="ย้อนกลับ">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <h1 class="appbar-title" id="title-analysis" tabindex="-1" data-focus>AI วิเคราะห์ทริป</h1>
+    </header>
+    <div id="analysis-body"></div>
+    <div class="sticky-actions">
+      <button type="button" class="btn btn-primary" id="btn-match">ค้นหาความคุ้มครองที่เหมาะ</button>
     </div>
   </section>
 
-  <!-- ══════════ 3. MATCHING — แผนจากพันธมิตร ══════════ -->
-  <section class="screen" id="screen-plans" aria-labelledby="h-plans">
-    <header class="topbar"><button class="back" data-go="analysis" aria-label="ย้อนกลับ">←</button><h1 id="h-plans" tabindex="-1">แผนที่เหมาะกับทริปนี้</h1></header>
-
-    <div class="trip-chip" id="trip-chip"></div>
-
-    <div class="notice"><b>ข้อมูลสมมติเพื่อสาธิต</b> — บริษัทพันธมิตรและเบี้ยทั้งหมดเป็นตัวเลขตัวอย่าง ไม่ใช่ข้อเสนอจริงของบริษัทใด</div>
-
-    <div id="plan-list"></div>
-    <div id="excluded-list"></div>
-
-    <p class="section-hint">ระบบเรียงตามความเหมาะสมกับทริป ไม่ใช่ตามค่าตอบแทน</p>
-    <button class="btn btn-ghost" data-go="insurers">ดูบริษัทประกันภัยจริงในประเทศไทย</button>
+  <!-- ═══════════ แผนที่จับคู่ได้ ═══════════ -->
+  <section class="screen" id="screen-plans" aria-labelledby="title-plans">
+    <header class="appbar">
+      <button type="button" class="icon-btn" data-go="back" aria-label="ย้อนกลับ">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <h1 class="appbar-title" id="title-plans" tabindex="-1" data-focus>แผนที่เหมาะกับทริปนี้</h1>
+    </header>
+    <div id="plans-body"></div>
   </section>
 
-  <!-- ══════════ 6. บริษัทประกันภัยจริง ══════════ -->
-  <section class="screen" id="screen-insurers" aria-labelledby="h-insurers">
-    <header class="topbar"><button class="back" data-go="plans" aria-label="ย้อนกลับ">←</button><h1 id="h-insurers" tabindex="-1">บริษัทประกันภัยในไทย</h1></header>
-
-    <div class="notice"><b>หน้านี้คือข้อมูลจริง</b> — ลิงก์ไปเว็บไซต์ทางการของแต่ละบริษัท ไม่มีเบี้ยหรือทุนประกันจากเรา และบริษัทเหล่านี้<b>ยังไม่ได้เป็นพันธมิตร</b>ของแพลตฟอร์ม เป็นรายชื่อเป้าหมายที่ต้องการเชื่อมต่อในอนาคต</div>
-
-    <h2 class="section-title">ตรวจสอบก่อนซื้อประกันทุกครั้ง</h2>
-    <div id="ins-official"></div>
-
-    <h2 class="section-title">บริษัทประกันวินาศภัย</h2>
-    <p class="section-hint">ดูรายชื่อครบถ้วนได้ที่เว็บไซต์สมาคมประกันวินาศภัยไทย</p>
-    <div id="ins-companies"></div>
-
-    <h2 class="section-title">แพลตฟอร์มเปรียบเทียบและซื้อออนไลน์</h2>
-    <div id="ins-platforms"></div>
-
-    <div class="card card-info">
-      <h2>ทำไมเราถึงแยกหน้านี้ออกจากผลการจับคู่</h2>
-      <p>แผนที่ระบบจับคู่ให้ในหน้าก่อนหน้าใช้ <b>บริษัทสมมติ ก–จ</b> เพื่อสาธิตกลไก เราไม่นำชื่อบริษัทจริงมาผูกกับเบี้ยและทุนประกันที่เราสมมติขึ้น เพราะจะทำให้ผู้ใช้เข้าใจผิดว่าเป็นข้อเสนอจริง</p>
-      <p>เมื่อระบบเชื่อม API กับบริษัทจริงแล้ว ราคาและความคุ้มครองทุกตัวจะมาจากบริษัทโดยตรง และบริษัทเป็นผู้ออกกรมธรรม์เสมอ</p>
-    </div>
-  </section>
-
-  <!-- ══════════ 4. CHECKOUT — ซื้อ (จำลอง) ══════════ -->
-  <section class="screen" id="screen-checkout" aria-labelledby="h-checkout">
-    <header class="topbar"><button class="back" data-go="plans" aria-label="ย้อนกลับ">←</button><h1 id="h-checkout" tabindex="-1">ยืนยันความคุ้มครอง</h1></header>
-
+  <!-- ═══════════ ยืนยัน ═══════════ -->
+  <section class="screen" id="screen-checkout" aria-labelledby="title-checkout">
+    <header class="appbar">
+      <button type="button" class="icon-btn" data-go="back" aria-label="ย้อนกลับ">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <h1 class="appbar-title" id="title-checkout" tabindex="-1" data-focus>ยืนยันความคุ้มครอง</h1>
+    </header>
     <div id="checkout-body"></div>
-
-    <label class="consent-item">
-      <input type="checkbox" id="checkout-consent">
-      <div><b>ฉันเข้าใจว่านี่คือการสาธิต</b><span>ไม่มีการชำระเงินจริง ไม่มีกรมธรรม์จริง และไม่มีข้อมูลถูกส่งไปยังบริษัทใด</span></div>
-    </label>
-
-    <div class="sticky-cta">
-      <button class="btn btn-primary" id="btn-buy" type="button" disabled>ยืนยัน (จำลองการซื้อ)</button>
+    <div class="sticky-actions">
+      <button type="button" class="btn btn-primary" id="btn-confirm" disabled>ยืนยัน (จำลองการซื้อ)</button>
     </div>
   </section>
 
-  <!-- ══════════ 5. POLICY — กรมธรรม์ดิจิทัล (ตัวอย่าง) ══════════ -->
-  <section class="screen" id="screen-policy" aria-labelledby="h-policy">
-    <header class="topbar"><button class="back" data-go="home" aria-label="ย้อนกลับ">←</button><h1 id="h-policy" tabindex="-1">ความคุ้มครองของคุณ</h1></header>
+  <!-- ═══════════ กรมธรรม์ ═══════════ -->
+  <section class="screen" id="screen-policy" aria-labelledby="title-policy">
+    <header class="appbar">
+      <button type="button" class="icon-btn" data-go="home" aria-label="กลับหน้าแรก">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <h1 class="appbar-title" id="title-policy" tabindex="-1" data-focus>ความคุ้มครองของคุณ</h1>
+    </header>
     <div id="policy-body"></div>
-    <button class="btn btn-primary" data-go="home">เริ่มทริปใหม่</button>
   </section>
 
-  <!-- ══════════ 6. B2B — สำหรับบริษัทประกัน ══════════ -->
-  <section class="screen" id="screen-b2b" aria-labelledby="h-b2b">
-    <header class="topbar"><button class="back" data-go="home" aria-label="ย้อนกลับ">←</button><h1 id="h-b2b" tabindex="-1">สำหรับบริษัทประกันภัย</h1></header>
-
-    <div class="hero hero-simple">
-      <h1 class="hero-title" style="font-size:22px">เราไม่ใช่บริษัทประกัน<br>เราคือแพลตฟอร์มของคุณ</h1>
-      <p class="hero-sub">ลูกค้าไม่รู้ว่าตัวเองควรซื้ออะไร — เราแปลงคำพูดธรรมดาของลูกค้าให้กลายเป็นความต้องการที่ชัดเจน แล้วจับคู่กับผลิตภัณฑ์ที่คุณมีอยู่แล้ว</p>
-    </div>
-
-    <div class="card">
-      <h2>ลูกค้าเดินทางมาหาคุณอย่างไร</h2>
-      <div class="flow">
-        <div class="flow-step">👤 ลูกค้าเล่าทริปด้วยภาษาธรรมดา</div>
-        <div class="flow-arrow">↓</div>
-        <div class="flow-step">🤖 AI วิเคราะห์คน วัน ปลายทาง ความเสี่ยง</div>
-        <div class="flow-arrow">↓</div>
-        <div class="flow-step">🔎 จับคู่กับผลิตภัณฑ์ของพันธมิตร</div>
-        <div class="flow-arrow">↓</div>
-        <div class="flow-step">💰 แสดงราคาจริงจาก API ของคุณ</div>
-        <div class="flow-arrow">↓</div>
-        <div class="flow-step current">📄 คุณออกกรมธรรม์ ได้ลูกค้าใหม่</div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>สิ่งที่พันธมิตรได้รับ</h2>
-      <div class="reason"><span class="dot">▸</span><span><b>ลูกค้าที่พร้อมซื้อ</b> — มาถึงพร้อมความต้องการชัดเจน ไม่ใช่คนที่เข้ามาดูเฉย ๆ</span></div>
-      <div class="reason"><span class="dot">▸</span><span><b>ขายเป็นทริป ไม่ใช่รายปี</b> — เข้าถึงกลุ่มที่ไม่เคยซื้อประกันรายปีเลย</span></div>
-      <div class="reason"><span class="dot">▸</span><span><b>เชื่อมผ่าน API</b> — ผลิตภัณฑ์และราคามาจากระบบของคุณโดยตรง เราไม่แตะการรับประกัน</span></div>
-      <div class="reason"><span class="dot">▸</span><span><b>การจับคู่โปร่งใส</b> — ทุกคำแนะนำมีเหตุผลกำกับ ตรวจสอบย้อนหลังได้</span></div>
-    </div>
-
-    <div class="card card-info">
-      <h2>โมเดลธุรกิจ</h2>
-      <p>ค่าธรรมเนียมต่อกรมธรรม์ที่เกิดขึ้นจริงผ่านแพลตฟอร์ม หรือให้เช่าระบบ (License) ไปฝังในช่องทางของบริษัทเอง — บริษัทเป็นผู้รับประกันและออกกรมธรรม์เสมอ เราเป็นเทคโนโลยีเท่านั้น</p>
-    </div>
+  <!-- ═══════════ ข้อมูลของฉัน ═══════════ -->
+  <section class="screen" id="screen-account" aria-labelledby="title-account">
+    <header class="appbar">
+      <button type="button" class="icon-btn" data-go="back" aria-label="ย้อนกลับ">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <h1 class="appbar-title" id="title-account" tabindex="-1" data-focus>ความคุ้มครองและข้อมูล</h1>
+    </header>
+    <div id="account-body"></div>
   </section>
 
-</div>
+  <!-- ═══════════ บริษัทประกันภัยจริง ═══════════ -->
+  <section class="screen" id="screen-insurers" aria-labelledby="title-insurers">
+    <header class="appbar">
+      <button type="button" class="icon-btn" data-go="back" aria-label="ย้อนกลับ">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <h1 class="appbar-title" id="title-insurers" tabindex="-1" data-focus>บริษัทประกันภัยในไทย</h1>
+    </header>
+    <div id="insurers-body"></div>
+  </section>
 
-<!-- วิธีติดตั้งบน iPhone — Safari ไม่รองรับปุ่มติดตั้งอัตโนมัติ ต้องบอกขั้นตอนให้ผู้ใช้ -->
-<div class="sheet-back" id="ios-sheet" hidden>
-  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="ios-h">
+  <!-- ═══════════ สำหรับบริษัทประกันภัย ═══════════ -->
+  <section class="screen" id="screen-b2b" aria-labelledby="title-b2b">
+    <header class="appbar">
+      <button type="button" class="icon-btn" data-go="back" aria-label="ย้อนกลับ">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <h1 class="appbar-title" id="title-b2b" tabindex="-1" data-focus>สำหรับบริษัทประกันภัย</h1>
+    </header>
+    <div id="b2b-body"></div>
+  </section>
+
+</main>
+
+<!-- แผ่นแนะนำการติดตั้งบน iPhone -->
+<div class="sheet-backdrop" id="ios-sheet" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="ios-sheet-title">
     <div class="sheet-grip"></div>
-    <h2 id="ios-h">ติดตั้งลงหน้าจอโฮม</h2>
+    <h2 id="ios-sheet-title">ติดตั้งลงหน้าจอโฮม</h2>
     <p>บน iPhone ให้ทำตาม 3 ขั้นตอนนี้ใน Safari</p>
-    <ol>
+    <ol class="numbered">
       <li>กดปุ่ม <b>แชร์</b> ที่แถบด้านล่าง</li>
       <li>เลื่อนลงแล้วเลือก <b>เพิ่มลงในหน้าจอโฮม</b></li>
-      <li>กด <b>เพิ่ม</b> มุมขวาบน</li>
+      <li>กด <b>เพิ่ม</b> ที่มุมขวาบน</li>
     </ol>
-    <button class="btn btn-ghost" type="button" id="ios-close">เข้าใจแล้ว</button>
+    <button type="button" class="btn btn-secondary" data-close-sheet>เข้าใจแล้ว</button>
   </div>
 </div>
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-<script src="js/trip.js"></script>
-<script src="js/store.js"></script>
-<script src="js/app.js"></script>
+<script type="module" src="js/app.js"></script>
 </body>
 </html>

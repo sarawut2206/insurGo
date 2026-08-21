@@ -1,24 +1,21 @@
-/* sw.js — service worker
- * ทำให้แอปเปิดใช้งานได้แม้ไม่มีอินเทอร์เน็ต (สำคัญตอนอัดคลิปในที่สัญญาณไม่ดี)
+/* sw.js — service worker (ใช้เฉพาะเวอร์ชันเว็บ/PWA)
  *
- * ใช้กลยุทธ์ network-first ไม่ใช่ cache-first
+ * ใช้ network-first ไม่ใช่ cache-first
  * เหตุผล: ระหว่างพัฒนา cache-first จะเสิร์ฟโค้ดเก่าค้างไว้แม้แก้ไฟล์แล้ว
- * ซึ่งเสี่ยงมากที่จะอัดคลิปจากบิลด์เก่าโดยไม่รู้ตัว
- * network-first ได้ของใหม่เสมอเมื่อออนไลน์ และยังเปิดได้ตามปกติเมื่อออฟไลน์
+ * ซึ่งเสี่ยงมากที่จะสาธิตหรืออัดคลิปจากบิลด์เก่าโดยไม่รู้ตัว
  */
 
-const CACHE = 'pkkk-v4';
+const CACHE = 'insurgo-v5';
 
 const ASSETS = [
-  './',
-  './index.html',
-  './manifest.json',
-  './css/styles.css',
-  './js/trip.js',
-  './js/store.js',
+  './', './index.html', './manifest.json',
+  './css/app.css',
   './js/app.js',
-  './icons/icon.svg',
-  './icons/logo.png'
+  './js/core/ui.js', './js/core/router.js', './js/core/store.js',
+  './js/core/native.js', './js/core/nlu.js', './js/core/match.js',
+  './js/data/places.js', './js/data/activities.js', './js/data/plans.js',
+  './js/screens/trip.js', './js/screens/quote.js', './js/screens/info.js',
+  './icons/icon.svg', './icons/logo.png'
 ];
 
 self.addEventListener('install', e => {
@@ -38,7 +35,6 @@ self.addEventListener('fetch', e => {
   e.respondWith(
     fetch(e.request)
       .then(res => {
-        // เก็บสำเนาล่าสุดไว้ใช้ตอนออฟไลน์
         const copy = res.clone();
         caches.open(CACHE).then(c => c.put(e.request, copy)).catch(() => {});
         return res;
